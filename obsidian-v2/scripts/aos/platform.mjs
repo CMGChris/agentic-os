@@ -1,0 +1,187 @@
+// The only per-OS code behind `aos`: who listens on a port, what that process
+// is, where a command lives, and how to open a page. Parsers are pure so both
+// operating systems are covered by fixtures wherever the suite runs.
+import fs from 'node:fs';
+import http from 'node:http';
+import path from 'node:path';
+import {spawn, spawnSync} from 'node:child_process';
+
+export const isWindows = process.platform === 'win32';
+const caseless = process.platform === 'win32' || process.platform === 'darwin';
+
+// Same place on disk. Links are resolved when the paths exist (macOS reports /private/var for /var).
+export function samePath(a, b) {
+  if (!a || !b) return false;
+  const real = value => { const full = path.resolve(String(value)); try { return fs.realpathSync.native(full); } catch { return full; } };
+  const left = real(a), right = real(b);
+  return caseless ? left.toLowerCase() === right.toLowerCase() : left === right;
+}
+
+export function parseLsofPids(text) {
+  return [...new Set(String(text || '').split(/\r?\n/).map(line => line.trim()).filter(line => /^\d{1,10}$/.test(line)).map(Number))];
+}
+
+// `ps -ww -o lstart=,command= -p <pid>` → "Mon Sep 21 13:35:02 2026 /usr/bin/node /x/bridge.mjs"
+export function parsePsLine(text) {
+  const match = String(text || '').trim().match(/^(\w{3}\s+\w{3}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}\s+\d{4})\s+(.+)$/s);
+  if (!match) return null;
+  const commandLine = match[2].trim();
+  return {startedAt: match[1].replace(/\s+/g, ' '), commandLine, name: path.basename(commandLine.split(/\s+/)[0] || '')};
+}
+
+export function parseWindowsProcess(text) {
+  let data; try { data = JSON.parse(String(text || '').replace(/^\uFEFF/, '').trim() || 'null'); } catch { return null; }
+  if (!data || !Number.isSafeInteger(data.pid)) return null;
+  return {pid: data.pid, name: String(data.name || ''), commandLine: String(data.commandLine || ''), startedAt: String(data.startedAt || '')};
+}
+
+function powershell(script, run) {
+  const exe = path.join(process.env.SystemRoot || 'C:\\Windows', 'System32', 'WindowsPowerShell', 'v1.0', 'powershell.exe');
+  return run(exe, ['-NoProfile', '-NonInteractive', '-Command', script], {encoding: 'utf8', windowsHide: true, timeout: 15000});
+}
+const processScript = filter => `$p=Get-CimInstance Win32_Process -Filter "${filter}";if($p){@{pid=[int]$p.ProcessId;name=$p.Name;commandLine=$p.CommandLine;startedAt=$p.CreationDate.ToUniversalTime().ToString('o')}|ConvertTo-Json -Compress}`;
+
+export function processInfo(pid, {run = spawnSync, platform = process.platform} = {}) {
+  if (!Number.isSafeInteger(pid) || pid < 1) return null;
+  if (platform === 'win32') return parseWindowsProcess(powershell(processScript(`ProcessId=${pid}`), run).stdout);
+  const result = run('ps', ['-ww', '-o', 'lstart=,command=', '-p', String(pid)], {encoding: 'utf8', timeout: 5000});
+  const parsed = result.status === 0 ? parsePsLine(result.stdout) : null;
+  return parsed && {pid, ...parsed};
+}
+
+// Pure. The pids of listed processes that may run from `dir`: an executable or command line inside
+// it, or one that names the folder as a path segment at all (a program started with a relative path,
+// e.g. `.runtime/speech-venv/bin/python`, shows no absolute path). Deliberately cautious: a false
+// match only postpones replacing the folder, a missed one could replace it while in use.
+export function processesInDir(rows, dir) {
+  const norm = value => String(value || '').replace(/\\/g, '/').toLowerCase();
+  const root = norm(path.resolve(dir)).replace(/\/$/, '') + '/';
+  const segment = new RegExp(`(^|[\\s"'/=])${path.basename(path.resolve(dir)).toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/`);
+  return rows.filter(row => [row.executable, row.commandLine].some(value => { const text = norm(value); return text.includes(root) || segment.test(text); })).map(row => row.pid);
+}
+// Every running process started from inside `dir` (a folder that is about to be replaced), or null
+// when the process list cannot be read: unknown is never treated as "nothing is running".
+export function processesUsing(dir, {run = spawnSync, platform = process.platform} = {}) {
+  if (platform === 'win32') {
+    const result = powershell(`@(Get-CimInstance Win32_Process -ErrorAction Stop|ForEach-Object{@{pid=[int]$_.ProcessId;executable=[string]$_.ExecutablePath;commandLine=[string]$_.CommandLine}})|ConvertTo-Json -Compress -Depth 3`, run);
+    if (result.status !== 0) return null;
+    let rows; try { rows = JSON.parse(String(result.stdout || '').replace(/^﻿/, '').trim()); } catch { return null; }
+    return Array.isArray(rows) ? processesInDir(rows, dir) : rows && typeof rows === 'object' ? processesInDir([rows], dir) : null;
+  }
+  const result = run('ps', ['-axww', '-o', 'pid=,command='], {encoding: 'utf8', timeout: 5000});
+  if (result.status !== 0) return null;
+  const rows = String(result.stdout || '').split('\n').map(line => /^\s*(\d+)\s+(.*)$/.exec(line)).filter(Boolean).map(match => ({pid: +match[1], commandLine: match[2]}));
+  if (!rows.length) return null;
+  return [...new Set([...processesInDir(rows, dir), ...unplacedPythons(rows, dir, {cwdOf: pid => processCwd(pid, {run})})])];
+}
+
+// A Python started as a bare `python` (an activated environment) or by a relative path such as
+// `bin/python` does not show which environment it runs from. Relative ones are resolved against the
+// process's working directory; anything that cannot be placed counts as possibly running from `dir`.
+export function unplacedPythons(rows, dir, {cwdOf}) {
+  const root = path.resolve(dir);
+  const inside = file => { const relative = path.relative(root, file); return relative === '' || (!relative.startsWith('..') && !path.isAbsolute(relative)); };
+  const hits = [];
+  for (const row of rows) {
+    const program = String(row.commandLine || '').trim().split(/\s+/)[0].replace(/^["']|["']$/g, '');
+    if (!/^python(?:\d+(?:\.\d+)?)?$/i.test(path.basename(program)) || path.isAbsolute(program)) continue;
+    if (!program.includes('/')) { hits.push(row.pid); continue; }
+    const cwd = cwdOf(row.pid);
+    if (!cwd || inside(path.resolve(cwd, program))) hits.push(row.pid);
+  }
+  return hits;
+}
+function processCwd(pid, {run}) {
+  const result = run('lsof', ['-a', '-p', String(pid), '-d', 'cwd', '-Fn'], {encoding: 'utf8', timeout: 5000});
+  const line = result.status === 0 ? String(result.stdout || '').split('\n').find(item => item.startsWith('n/')) : null;
+  return line ? line.slice(1) : null;
+}
+
+// The loopback listener on a port, or null. More than one listener is reported
+// as ambiguous so a caller never picks a process to stop by position.
+export function listener(port, {run = spawnSync, platform = process.platform} = {}) {
+  if (!Number.isSafeInteger(port) || port < 1 || port > 65535) throw new Error('Invalid port');
+  if (platform === 'win32') {
+    const script = `$c=@(Get-NetTCPConnection -LocalPort ${port} -State Listen -ErrorAction SilentlyContinue|Where-Object{$_.LocalAddress -eq '127.0.0.1'});if($c.Count -gt 1){'{"ambiguous":true}'}elseif($c.Count -eq 1){$id=$c[0].OwningProcess;${processScript('ProcessId=$id')}}`;
+    const out = String(powershell(script, run).stdout || '');
+    return /"ambiguous"/.test(out) ? {ambiguous: true} : parseWindowsProcess(out);
+  }
+  const result = run('lsof', ['-nP', `-iTCP@127.0.0.1:${port}`, '-sTCP:LISTEN', '-t'], {encoding: 'utf8', timeout: 5000});
+  const pids = parseLsofPids(result.stdout);
+  if (pids.length > 1) return {ambiguous: true};
+  return pids.length ? processInfo(pids[0], {run, platform}) : null;
+}
+
+export function which(command, {env = process.env, exists = fs.existsSync, platform = process.platform} = {}) {
+  const names = platform === 'win32' ? ['.exe', '.cmd', '.bat', ''].map(ext => command + ext) : [command];
+  const flavour = platform === 'win32' ? path.win32 : path.posix;
+  for (const dir of String(env.PATH || env.Path || '').split(flavour.delimiter).filter(Boolean))
+    for (const name of names) { const candidate = flavour.join(dir, name); if (exists(candidate)) return candidate; }
+  return null;
+}
+
+export function openUrl(url, {run = spawnSync, platform = process.platform} = {}) {
+  if (!/^http:\/\/127\.0\.0\.1:\d{2,5}\//.test(url)) throw new Error('Only local pages are opened');
+  if (platform === 'win32') return run('rundll32.exe', ['url.dll,FileProtocolHandler', url], {windowsHide: true, timeout: 10000}).status === 0;
+  return run(platform === 'darwin' ? 'open' : 'xdg-open', [url], {timeout: 10000}).status === 0;
+}
+
+// One request to a local service on a connection of its own, closed afterwards.
+// Never the shared pool behind fetch(): this launcher freezes its event loop for seconds to minutes
+// at a time (package installs, process look-ups, a CLI answering), a local server closes an idle
+// kept-alive connection after about five seconds, and a frozen program cannot see that happen. Its
+// next request then goes out on the dead connection and comes back as ECONNRESET, which reads as
+// "the service is down" when it is perfectly healthy. A connection per request cannot go stale.
+export function request(url, {method = 'GET', headers = {}, body, timeoutMs = 4000} = {}) {
+  return new Promise((resolve, reject) => {
+    const target = new URL(url);
+    if (target.protocol !== 'http:' || !['127.0.0.1', 'localhost'].includes(target.hostname)) { reject(new Error('Only local services are contacted this way')); return; }
+    const payload = body === undefined ? null : Buffer.isBuffer(body) ? body : Buffer.from(String(body));
+    const outgoing = http.request(target, {method, agent: false, headers: {...headers, ...(payload ? {'Content-Length': payload.length} : {})}}, response => {
+      const chunks = [];
+      response.on('data', chunk => chunks.push(chunk));
+      response.on('error', fail);
+      response.on('end', () => { clearTimeout(timer); resolve({ok: response.statusCode >= 200 && response.statusCode < 300, status: response.statusCode, headers: response.headers, body: Buffer.concat(chunks)}); });
+    });
+    function fail(error) { clearTimeout(timer); outgoing.destroy(); reject(error); }
+    const timer = setTimeout(() => fail(Object.assign(new Error(`No answer within ${timeoutMs} ms`), {code: 'ETIMEDOUT'})), timeoutMs);
+    outgoing.on('error', fail);
+    outgoing.end(payload || undefined);
+  });
+}
+
+export async function fetchJson(url, {method = 'GET', headers = {}, body, timeoutMs = 4000} = {}) {
+  const response = await request(url, {method, timeoutMs, headers: {...(body === undefined ? {} : {'Content-Type': 'application/json'}), ...headers},
+    body: body === undefined ? undefined : JSON.stringify(body)});
+  const text = response.body.toString('utf8');
+  let data = null; try { data = text ? JSON.parse(text) : null; } catch { /* non-JSON body */ }
+  return {ok: response.ok, status: response.status, data};
+}
+export const tryJson = async (url, options) => { try { const result = await fetchJson(url, options); return result.ok ? result.data : null; } catch { return null; } };
+// Like tryJson, but says WHY there was no answer, so a check can report the real reason.
+export const probeJson = async (url, options) => { try { return {...await fetchJson(url, options), error: ''}; } catch (error) { return {ok: false, status: 0, data: null, error: String(error.code || error.message || error)}; } };
+
+// Runs a program without freezing this one: timers, open connections and progress output keep working
+// while it runs. Same result shape as spawnSync where the launcher uses it. After the time limit the
+// program is asked to stop, then forced, and the caller gets its answer within graceMs either way:
+// a program that ignores the request, or a grandchild that keeps the output pipes open, cannot hang it.
+export function run(command, args, {cwd, timeoutMs = 120000, graceMs = 3000, input = '', env} = {}) {
+  return new Promise(resolve => {
+    let child, stdout = '', stderr = '', timedOut = false, settled = false;
+    let force;
+    const finish = (status, error) => { if (settled) return; settled = true; clearTimeout(timer); clearTimeout(force); resolve({status, stdout, stderr, timedOut, error}); };
+    try { child = spawn(command, args, {cwd, env, windowsHide: true, stdio: ['pipe', 'pipe', 'pipe']}); } catch (error) { resolve({status: null, stdout, stderr, timedOut, error}); return; }
+    const timer = setTimeout(() => {
+      timedOut = true; try { child.kill(); } catch { /* already gone */ }
+      force = setTimeout(() => { try { child.kill('SIGKILL'); } catch { /* already gone */ } child.stdout.destroy(); child.stderr.destroy(); finish(null); }, graceMs);
+    }, timeoutMs);
+    child.stdout.setEncoding('utf8').on('data', text => { if (stdout.length < 4e6) stdout += text; });
+    child.stderr.setEncoding('utf8').on('data', text => { if (stderr.length < 4e6) stderr += text; });
+    child.on('error', error => finish(null, error));
+    child.on('close', code => finish(code));
+    child.stdin.on('error', () => { /* the program never read its input */ });
+    child.stdin.end(input);
+  });
+}
+
+export const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));

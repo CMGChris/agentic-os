@@ -1,0 +1,167 @@
+name: ci
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    env:
+      TZ: America/Chicago   # several routing tests pin calendar dates in this zone
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Voice shortcut unit tests (no microphone or OS hooks)
+        run: python obsidian-v2/tests/mac-hotkey.test.py
+      - name: Speech service test dependencies
+        run: python -m pip install --disable-pip-version-check fastapi httpx
+      - name: Speech service unit tests (mocked audio and models)
+        run: python obsidian-v2/tests/speech-runtime.test.py
+      - name: Bridge and plugin packages
+        working-directory: obsidian-v2
+        run: npm ci --no-audit --no-fund
+      - name: HUD packages
+        working-directory: hugo-v2
+        run: npm ci --no-audit --no-fund
+      - name: Build the plugin
+        working-directory: obsidian-v2
+        run: npm run build
+      # What `aos setup` does on a Mac: the terminal helper must be executable.
+      - name: Terminal helper is executable
+        shell: bash
+        run: node -e "import('./obsidian-v2/scripts/aos/setup.mjs').then(m => console.log(m.fixPtyHelper('obsidian-v2')))"
+      # macOS keeps its temp folder behind a link (/var -> /private/var); the storage checks refuse links by design.
+      - name: Temp folder without links
+        if: runner.os == 'macOS'
+        shell: bash
+        run: echo "TMPDIR=$RUNNER_TEMP" >> "$GITHUB_ENV"
+      - name: Stand-in for the coding CLIs
+        # Some routing tests only need "a provider is installed"; no CLI is ever run by them.
+        shell: bash
+        run: |
+          echo "AOS_CODEX_BIN=$(node -p process.execPath)" >> "$GITHUB_ENV"
+          echo "AOS_CLAUDE_BIN=$(node -p process.execPath)" >> "$GITHUB_ENV"
+      - name: Bridge tests
+        working-directory: obsidian-v2
+        run: node --test --test-concurrency=2 --test-timeout=90000 "tests/*.test.mjs"
+      - name: HUD typecheck and tests
+        working-directory: hugo-v2
+        run: |
+          npm run typecheck
+          npm test
+
+  # The pinned voice packages must install from published builds and import on the oldest and newest
+  # supported Python (the install job below runs the full speech round trip on 3.12). Package and import
+  # compatibility only: no models are downloaded here. Intel Macs have no GitHub runner and stay unverified.
+  voice-packages:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest]
+        python: ['3.10', '3.13']
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install the pinned voice packages into a fresh environment
+        run: |
+          python -m venv voice-check
+          if [ "$RUNNER_OS" = "Windows" ]; then PY=voice-check/Scripts/python.exe; else PY=voice-check/bin/python; fi
+          "$PY" -m pip install --disable-pip-version-check --prefer-binary -r obsidian-v2/runner/speech-requirements.txt
+          "$PY" -m pip freeze
+          "$PY" -c "import kokoro_onnx, faster_whisper, onnxruntime, ctranslate2, soundfile, fastapi, uvicorn; print('voice packages import on', __import__('sys').version)"
+
+  install:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      # First, a computer where ANOTHER program already runs a speech service (port 3108). Setup must
+      # share it and download nothing, the doctor must prove speak -> listen through it, and stop must
+      # leave it running. A clean runner never has such a service, so a stand-in plays that program.
+      - name: Another program's speech service (stand-in on 3108)
+        run: |
+          node -e "require('child_process').spawn(process.execPath,['obsidian-v2/tests/fixtures/fake-speech.mjs','--port','3108'],{detached:true,stdio:'ignore'}).unref()"
+          for attempt in $(seq 1 20); do curl -fs http://127.0.0.1:3108/health && break; sleep 1; done
+          curl -fs http://127.0.0.1:3108/health
+      - name: Install beside it (voice is shared, nothing is downloaded)
+        run: |
+          mkdir -p ci-logs
+          node aos.mjs setup --vault "$RUNNER_TEMP/vault" --voice yes --autostart no --ci | tee ci-logs/setup-shared.log
+          grep -q "will be shared, so there is nothing to download" ci-logs/setup-shared.log
+          test ! -e obsidian-v2/.runtime/speech-venv
+      # Conversations inside Obsidian: the Terminal plugin runs its helper with this managed Python
+      # (Windows needs psutil + pywinctl in it). Checked through the managed interpreter, not the runner's.
+      - name: Terminal helper Python is prepared and recorded
+        run: |
+          node -e "import('./obsidian-v2/runner/terminal-python-record.mjs').then(m => { const p = m.recordedTerminalPython(require('path').resolve('obsidian-v2/.runtime')); console.log(p); if (!p) process.exit(1); })"
+          if [ "$RUNNER_OS" = "Windows" ]; then obsidian-v2/.runtime/terminal-venv/Scripts/python.exe -c "import psutil, pywinctl"; else obsidian-v2/.runtime/terminal-venv/bin/python -c "import pty, selectors"; fi
+      - name: A fresh vault gets a provider without asking
+        run: node -e "const s=JSON.parse(require('fs').readFileSync(process.env.RUNNER_TEMP+'/vault/system/v2/provider.json','utf8'));console.log(s);if(!['claude','codex'].includes(s.provider))process.exit(1)"
+      - name: Doctor with the shared voice
+        run: |
+          node aos.mjs doctor --ci | tee ci-logs/doctor-shared.log
+          grep -q "PASS Voice service healthy - .*shared service at http://127.0.0.1:3108" ci-logs/doctor-shared.log
+          grep -q "PASS Text to speech" ci-logs/doctor-shared.log
+          grep -q "PASS Speech to text hears it back" ci-logs/doctor-shared.log
+      - name: The monitor runs no speech service of its own, and stop leaves the other program's alone
+        run: |
+          node aos.mjs status > ci-logs/status-shared.json
+          node -e "const s=JSON.parse(require('fs').readFileSync('ci-logs/status-shared.json','utf8'));const ids=s.supervisor.services.map(x=>x.id);console.log(ids,s.bridge.speech.url);if(ids.includes('speech')||s.bridge.speech.url!=='http://127.0.0.1:3108')process.exit(1)"
+          node aos.mjs stop | tee ci-logs/stop-shared.log
+          if grep -q "Stopped speech" ci-logs/stop-shared.log; then echo "stop touched the shared speech service"; exit 1; fi
+          curl -fs http://127.0.0.1:3108/health
+      - name: The other program goes away
+        run: |
+          curl -fs -X POST http://127.0.0.1:3108/quit
+          sleep 2
+          if curl -fs http://127.0.0.1:3108/health; then echo "stand-in still running"; exit 1; fi
+      # Now the ordinary case: nothing to share, so setup installs this installation's own voice.
+      - name: Install into a fresh vault, with voice
+        run: |
+          node aos.mjs setup --vault "$RUNNER_TEMP/vault" --provider claude --voice yes --autostart no --ci | tee ci-logs/setup-own.log
+          test -e obsidian-v2/.runtime/speech-venv
+          node -e "const s=JSON.parse(require('fs').readFileSync(process.env.RUNNER_TEMP+'/vault/system/v2/provider.json','utf8'));console.log(s);if(s.provider!=='claude'||s.model!=='opus')process.exit(1)"
+      - name: Doctor
+        run: |
+          node aos.mjs doctor --ci | tee ci-logs/doctor-own.log
+          grep -q "PASS Voice service healthy - .*this installation's own service on 3220" ci-logs/doctor-own.log
+          grep -q "PASS Speech to text hears it back" ci-logs/doctor-own.log
+      - name: Status
+        if: always()
+        run: node aos.mjs status || true
+      - name: Stop
+        run: node aos.mjs stop
+      - name: Logs
+        if: failure()
+        run: |
+          cat obsidian-v2/.runtime/service-supervisor.jsonl || true
+          ls -la obsidian-v2/.runtime || true
