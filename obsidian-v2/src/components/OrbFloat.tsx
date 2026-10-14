@@ -2,7 +2,7 @@ import {applyVoiceAction,openVoiceArtifact} from "../lib/voice-actions";
 import {readRun} from '../lib/queue';
 import {h} from 'preact';
 import {useEffect,useLayoutEffect,useMemo,useRef,useState} from 'preact/hooks';
-import type CuriosityCommandCenter from '../main';
+import type ChaseCommandCenter from '../main';
 import {useProvider} from '../lib/provider';
 import {v2VoiceTransport,assertVoiceVault} from '../lib/v2-voice';
 import {VoiceSession,type VoiceMode} from '../../shared/voice-session';
@@ -10,7 +10,7 @@ import GalaxyCore from './GalaxyCore';
 import {GraphCore} from './GraphCore';
 import {workFeed,workTarget,chooseWork,openWork,workConversations,setWorkProvider,type WorkTask} from '../lib/work';
 import {shortConversationTitle} from '../../shared/work-presentation';
-export function OrbFloat({plugin,surfaceKind='native'}:{plugin:CuriosityCommandCenter;surfaceKind?:'web'|'native'}){
+export function OrbFloat({plugin,surfaceKind='native'}:{plugin:ChaseCommandCenter;surfaceKind?:'web'|'native'}){
  const state=useProvider(plugin.app);
  const clampPosition=(right:number,bottom:number)=>({right:Math.max(4,Math.min(right,document.documentElement.clientWidth-128)),bottom:Math.max(4,Math.min(bottom,document.documentElement.clientHeight-152))});
  const [position,setPosition]=useState(()=>clampPosition(plugin.settings.orbRight,plugin.settings.orbBottom));

@@ -1,18 +1,18 @@
 param(
  [string]$Label=(Get-Date -Format 'yyyy-MM-dd-HHmm'),
- [switch]$SkipHugoBuild,
+ [switch]$SkipJarvisBuild,
  [switch]$SkipTests,
  [switch]$CheckOnly,
  [string]$LogDirectory=(Join-Path $PSScriptRoot '..\.runtime\activations')
 )
 $ErrorActionPreference='Stop'
 # Release the current repository state: run the suite and build the plugin, verify
-# idle state, stop the bridge gracefully, stop Hugo and the component preview,
-# rebuild Hugo, restart everything through service recovery, wait for the bridge,
+# idle state, stop the bridge gracefully, stop Jarvis and the component preview,
+# rebuild Jarvis, restart everything through service recovery, wait for the bridge,
 # THEN install the plugin. Installing last lets the Hot Reload marker reload the
 # native plugin with the bridge already online.
 $taskObsidian=(Resolve-Path (Join-Path $PSScriptRoot '..')).Path
-$taskHugo=(Resolve-Path (Join-Path $taskObsidian '..\hugo-v2')).Path
+$taskJarvis=(Resolve-Path (Join-Path $taskObsidian '..\jarvis-v2')).Path
 $taskNode=(Get-Command node -CommandType Application | Select-Object -First 1).Source
 $taskNpm=(Get-Command npm.cmd -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1).Source
 if(!$taskNpm){$taskNpm=(Get-Command npm -CommandType Application | Select-Object -First 1).Source}
@@ -41,17 +41,17 @@ function Get-ListenerProcess([int]$port,[string]$expectedFragment,[string]$expec
  if(!$process -or $process.Name -ne 'node.exe' -or !$process.CommandLine.Contains($expectedFragment) -or ($expectedArgs -and $process.CommandLine -notmatch $expectedArgs)){throw "Process identity mismatch on port $port; nothing stopped."}
  return $process
 }
-$taskHugoProcess=Get-ListenerProcess 3217 (Join-Path $taskHugo 'node_modules\next\dist\bin\next') 'start --hostname 127\.0\.0\.1 --port 3217'
+$taskJarvisProcess=Get-ListenerProcess 3217 (Join-Path $taskJarvis 'node_modules\next\dist\bin\next') 'start --hostname 127\.0\.0\.1 --port 3217'
 $taskPreviewProcess=Get-ListenerProcess 3218 (Join-Path $taskObsidian 'preview\server.mjs') ''
-$taskBuildPath=[IO.Path]::GetFullPath((Join-Path $taskHugo '.next'))
-$taskBackupPath=[IO.Path]::GetFullPath((Join-Path $taskHugo ('.runtime\next-before-'+$Label)))
-$taskFailedPath=[IO.Path]::GetFullPath((Join-Path $taskHugo ('.runtime\next-failed-'+$Label)))
+$taskBuildPath=[IO.Path]::GetFullPath((Join-Path $taskJarvis '.next'))
+$taskBackupPath=[IO.Path]::GetFullPath((Join-Path $taskJarvis ('.runtime\next-before-'+$Label)))
+$taskFailedPath=[IO.Path]::GetFullPath((Join-Path $taskJarvis ('.runtime\next-failed-'+$Label)))
 foreach($taskPath in @($taskBuildPath,$taskBackupPath,$taskFailedPath)){
- if(!$taskPath.StartsWith($taskHugo+[IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase)){throw 'Unexpected build path; no service changed.'}
+ if(!$taskPath.StartsWith($taskJarvis+[IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase)){throw 'Unexpected build path; no service changed.'}
 }
-if(!$SkipHugoBuild -and (Test-Path -LiteralPath $taskBackupPath)){throw "Build backup $taskBackupPath already exists. Choose another -Label; no service changed."}
+if(!$SkipJarvisBuild -and (Test-Path -LiteralPath $taskBackupPath)){throw "Build backup $taskBackupPath already exists. Choose another -Label; no service changed."}
 if($CheckOnly){
- [ordered]@{checkOnly=$true;version=$taskRepoVersion;vault=$taskVault;bridgePid=$taskBefore.bridge.pid;hugoPid=$(if($taskHugoProcess){$taskHugoProcess.ProcessId}else{$null});previewPid=$(if($taskPreviewProcess){$taskPreviewProcess.ProcessId}else{$null});nativeConnected=[bool]$taskNativeBefore.Count;readyToActivate=$true} | ConvertTo-Json
+ [ordered]@{checkOnly=$true;version=$taskRepoVersion;vault=$taskVault;bridgePid=$taskBefore.bridge.pid;jarvisPid=$(if($taskJarvisProcess){$taskJarvisProcess.ProcessId}else{$null});previewPid=$(if($taskPreviewProcess){$taskPreviewProcess.ProcessId}else{$null});nativeConnected=[bool]$taskNativeBefore.Count;readyToActivate=$true} | ConvertTo-Json
  return
 }
 
@@ -73,27 +73,27 @@ $taskDistManifest=Join-Path $taskObsidian 'dist\agentic-os-v2\manifest.json'
 $taskDistVersion=(Get-Content -LiteralPath $taskDistManifest -Raw | ConvertFrom-Json).version
 if($taskDistVersion -ne $taskRepoVersion){throw "The build produced $taskDistVersion but the repository is $taskRepoVersion; nothing changed."}
 
-$taskStopped=$false;$taskBuildSucceeded=$SkipHugoBuild.IsPresent
+$taskStopped=$false;$taskBuildSucceeded=$SkipJarvisBuild.IsPresent
 try{
- # 4. Graceful bridge shutdown (pauses recovery), then stop Hugo and the preview.
+ # 4. Graceful bridge shutdown (pauses recovery), then stop Jarvis and the preview.
  $taskAuth=Get-Content -LiteralPath (Join-Path $taskObsidian '.runtime\bridge-auth.json') -Raw | ConvertFrom-Json
  $taskStopped=$true
  Write-Step 'Stopping the idle bridge'
  Invoke-RestMethod 'http://127.0.0.1:3219/shutdown' -Method Post -Headers @{'X-V2-App'='native';'X-V2-Token'=$taskAuth.token} -ContentType 'application/json' -Body '{}' -TimeoutSec 5 | Out-Null
- foreach($taskProcess in @($taskHugoProcess,$taskPreviewProcess)){
+ foreach($taskProcess in @($taskJarvisProcess,$taskPreviewProcess)){
   if(!$taskProcess){continue}
   $taskCurrent=Get-CimInstance Win32_Process -Filter "ProcessId=$($taskProcess.ProcessId)"
   if($taskCurrent -and $taskCurrent.CreationDate -eq $taskProcess.CreationDate){Stop-Process -Id $taskProcess.ProcessId}
  }
- # 5. Rebuild Hugo from a clean output folder, keeping the previous build.
- if(!$SkipHugoBuild){
-  Write-Step 'Rebuilding Hugo'
+ # 5. Rebuild Jarvis from a clean output folder, keeping the previous build.
+ if(!$SkipJarvisBuild){
+  Write-Step 'Rebuilding Jarvis'
   if(Test-Path -LiteralPath $taskBuildPath){Move-Item -LiteralPath $taskBuildPath -Destination $taskBackupPath}
-  Push-Location $taskHugo
+  Push-Location $taskJarvis
   try{
-   $taskHugoLog=Join-Path $LogDirectory ("hugo-build-"+$Label+".log")
-   & $taskNode node_modules/next/dist/bin/next build *> $taskHugoLog
-   if($LASTEXITCODE -ne 0){Get-Content -LiteralPath $taskHugoLog -Tail 25;throw 'Hugo build failed.'}
+   $taskJarvisLog=Join-Path $LogDirectory ("jarvis-build-"+$Label+".log")
+   & $taskNode node_modules/next/dist/bin/next build *> $taskJarvisLog
+   if($LASTEXITCODE -ne 0){Get-Content -LiteralPath $taskJarvisLog -Tail 25;throw 'Jarvis build failed.'}
    $taskBuildSucceeded=$true
   }finally{Pop-Location}
  }
@@ -103,12 +103,12 @@ try{
    if(Test-Path -LiteralPath $taskBuildPath){Move-Item -LiteralPath $taskBuildPath -Destination $taskFailedPath}
    Move-Item -LiteralPath $taskBackupPath -Destination $taskBuildPath
   }
-  # 6. Restart bridge, preview and Hugo through recovery before touching the plugin.
+  # 6. Restart bridge, preview and Jarvis through recovery before touching the plugin.
   Write-Step 'Restarting services through recovery'
   & (Join-Path $PSScriptRoot 'start-recovery.ps1') -IncludePreview
  }
 }
-if(!$taskBuildSucceeded){throw 'Hugo build failed; previous build restored and services restarted. Plugin not installed.'}
+if(!$taskBuildSucceeded){throw 'Jarvis build failed; previous build restored and services restarted. Plugin not installed.'}
 
 # 7. Wait for the bridge to answer, so the automatic plugin reload finds it online.
 $taskDeadline=(Get-Date).AddSeconds(120);$taskBridge=$null
@@ -135,6 +135,6 @@ if($taskNativeBefore.Count){
   Start-Sleep -Seconds 3
  }
 }
-$taskSummary=[ordered]@{label=$Label;version=$taskRepoVersion;bridgePid=$taskBridge.health.pid;hugoRebuilt=(!$SkipHugoBuild);nativeReloaded=[bool]$taskLoaded;nativeVersion=$(if($taskLoaded){$taskLoaded.version}elseif($taskNativeBefore.Count){$taskNativeBefore[0].version+' (not reloaded yet; reload Agentic OS V2 or check the Hot Reload plugin)'}else{'Obsidian not connected'})}
+$taskSummary=[ordered]@{label=$Label;version=$taskRepoVersion;bridgePid=$taskBridge.health.pid;jarvisRebuilt=(!$SkipJarvisBuild);nativeReloaded=[bool]$taskLoaded;nativeVersion=$(if($taskLoaded){$taskLoaded.version}elseif($taskNativeBefore.Count){$taskNativeBefore[0].version+' (not reloaded yet; reload Agentic OS V2 or check the Hot Reload plugin)'}else{'Obsidian not connected'})}
 $taskSummary | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $LogDirectory ("after-"+$Label+".json"))
 $taskSummary | ConvertTo-Json

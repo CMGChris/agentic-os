@@ -1,4 +1,4 @@
-/* Curiosity Command Center — dashboard-token base. Full token port lands in M8. */
+/* Chase Command Center — dashboard-token base. Full token port lands in M8. */
 
 .aos-v2-cc-root {
 	--cc-bg-0: #0e0f10;
@@ -2696,7 +2696,7 @@
 }
 
 /* ------------------------------------------------------------------ */
-/* HUGO FLOATING VOICE ORB — body-mounted, draggable, click-to-talk  */
+/* JARVIS FLOATING VOICE ORB — body-mounted, draggable, click-to-talk  */
 /* ------------------------------------------------------------------ */
 
 /* mounted on document.body, outside the cockpit view — needs its own

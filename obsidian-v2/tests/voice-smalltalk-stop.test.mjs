@@ -20,16 +20,16 @@ const state={generated_at:new Date().toISOString(),vault_root:'.',metrics:[],run
 const rulesReply=t=>{const r=rulesRoute(t,state);return r.fallthrough?null:r.reply};
 
 test('small talk answers only when the whole utterance is small talk',()=>{
- assert.equal(rulesReply('thanks hugo'),'Anytime.');assert.equal(rulesReply('Thank you so much!'),'Anytime.');
+ assert.equal(rulesReply('thanks jarvis'),'Anytime.');assert.equal(rulesReply('Thank you so much!'),'Anytime.');
  assert.equal(rulesReply('can you hear me?'),'Loud and clear.');assert.equal(rulesReply("Hey, how's it going?"),'Running smooth — all systems green. What do you need?');
- assert.equal(rulesReply('good night'),"Goodnight. I'll keep watch.");assert.equal(rulesReply('okay cool'),'Standing by.');assert.match(rulesReply("what's up hugo"),/^Not much/);
- for(const t of ['thanks hugo, now research jev',"how's it going with the jev explainer",'can you hear me? okay research jev','good night, but first run the morning report',"what's up with the jev task",'how are you getting on with the explainer'])assert.doesNotMatch(String(rulesReply(t)||''),/Anytime|Loud and clear|Running smooth|Goodnight|Not much/,t);
+ assert.equal(rulesReply('good night'),"Goodnight. I'll keep watch.");assert.equal(rulesReply('okay cool'),'Standing by.');assert.match(rulesReply("what's up jarvis"),/^Not much/);
+ for(const t of ['thanks jarvis, now research jev',"how's it going with the jev explainer",'can you hear me? okay research jev','good night, but first run the morning report',"what's up with the jev task",'how are you getting on with the explainer'])assert.doesNotMatch(String(rulesReply(t)||''),/Anytime|Loud and clear|Running smooth|Goodnight|Not much/,t);
 });
 
 test('a leading pleasantry is dropped from a request and kept when it is the whole utterance',()=>{
  assert.equal(stripPleasantry("Thanks. Now can you research Jev's pricing model?"),"Now can you research Jev's pricing model?");
  assert.equal(stripPleasantry('Can you hear me? Okay, research Jev.'),'research Jev.');
- assert.equal(stripPleasantry('Hey Hugo, open my daily note'),'open my daily note');
+ assert.equal(stripPleasantry('Hey Jarvis, open my daily note'),'open my daily note');
  assert.equal(stripPleasantry('Great, do it'),'Great, do it');assert.equal(stripPleasantry('Great! Do it'),'Do it');
  for(const t of ['Nice, France, and Cannes: compare their populations.','Thanks. So far, this looks good.'])assert.equal(stripPleasantry(t),t.replace(/^Thanks\. /,''),t);
  for(const t of ['Thanks.','okay cool','Yes','No, cancel that','hi res image please','Thanks for the report, what did it say about sponsors?'])assert.equal(stripPleasantry(t),t,t);
@@ -74,7 +74,7 @@ test('a pleasantry in front of a request no longer eats the request',async t=>{
  const started=f.calls.find(c=>c.kind==='start');assert.match(started.prompt,/research Jev's pricing model/);assert.match(started.prompt,/Original voice request: Thanks\. Now can you research/);
  const mic=await f.speak('Can you hear me? Okay, research Jev.');
  assert.equal(mic.workIds.length,1);assert.notEqual(mic.reply,'Loud and clear.');
- const thanks=await f.speak('thanks hugo',{execute:f.noModel});assert.equal(thanks.reply,'Anytime.');assert.deepEqual(thanks.workIds,[]);
+ const thanks=await f.speak('thanks jarvis',{execute:f.noModel});assert.equal(thanks.reply,'Anytime.');assert.deepEqual(thanks.workIds,[]);
 });
 
 test('asking how a selected task is going is a question about the task, not a greeting',async t=>{

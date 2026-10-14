@@ -2,7 +2,7 @@ import { Notice, Plugin, WorkspaceLeaf } from "obsidian";
 import { assertTestVault,readSelection } from "./lib/provider";
 import { h, render } from "preact";
 import { CockpitView, COCKPIT_VIEW_TYPE } from "./view";
-import { DEFAULT_SETTINGS, CuriositySettings, CuriositySettingTab } from "./settings";
+import { DEFAULT_SETTINGS, ChaseSettings, ChaseSettingTab } from "./settings";
 import { OrbFloat } from "./components/OrbFloat";
 import {WorkView,WORK_VIEW} from './work-view';
 import {configureVoiceTransport} from './lib/v2-voice';
@@ -15,8 +15,8 @@ import {v2VoiceTransport} from './lib/v2-voice';
 import {retireEmptyLaunchers} from './lib/retire-legacy-launchers';
 import {registerSkillReports} from './lib/queue';
 
-export default class CuriosityCommandCenter extends Plugin {
-	settings!: CuriositySettings;
+export default class ChaseCommandCenter extends Plugin {
+	settings!: ChaseSettings;
 	readonly voiceHeartbeat = nativeVoiceHeartbeat;
 	private orbEl: HTMLDivElement | null = null;
 	private themeStyleEl: HTMLStyleElement | null = null;
@@ -79,8 +79,8 @@ export default class CuriosityCommandCenter extends Plugin {
 		});
 
 		this.addCommand({
-			id: "toggle-hugo-orb",
-			name: "Toggle Hugo orb",
+			id: "toggle-jarvis-orb",
+			name: "Toggle Jarvis orb",
 			callback: async () => {
 				this.settings.orbEnabled = !this.settings.orbEnabled;
 				await this.saveSettings();
@@ -88,7 +88,7 @@ export default class CuriosityCommandCenter extends Plugin {
 			},
 		});
 
-		this.addSettingTab(new CuriositySettingTab(this.app, this));
+		this.addSettingTab(new ChaseSettingTab(this.app, this));
 
 		// the orb floats over the whole workspace, not inside the cockpit
 		// view — wait for layout so document.body is settled
@@ -251,7 +251,7 @@ export default class CuriosityCommandCenter extends Plugin {
 		this.settings = Object.assign(
 			{},
 			DEFAULT_SETTINGS,
-			(await this.loadData()) as Partial<CuriositySettings>,
+			(await this.loadData()) as Partial<ChaseSettings>,
 		);
 	}
 

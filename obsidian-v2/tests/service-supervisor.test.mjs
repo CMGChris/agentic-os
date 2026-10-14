@@ -151,7 +151,7 @@ test('status is local read-only and excludes command, prompts and authentication
 test('a failing optional web server does not interrupt an adopted bridge', async t => {
   const bridge = await fixture(t), web = await fixture(t, {mode:'crash'});
   await bridge.foreign();
-  bridge.config.services.push({...web.config.services[0], id:'hugo'});
+  bridge.config.services.push({...web.config.services[0], id:'jarvis'});
   const supervisor = await bridge.start();
   await until(() => supervisor.snapshot().services[1].phase === 'blocked', 'optional web crash budget');
   assert.equal(supervisor.snapshot().services[0].phase, 'online');

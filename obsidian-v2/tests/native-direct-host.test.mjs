@@ -68,9 +68,9 @@ test('a missing or unsupported Terminal fails before claiming actions or changin
 });
 test('a refused Terminal says why once, only when a conversation is waiting to open, also across plugin reloads',async()=>{
  const f=fixture();f.app.plugins.plugins.terminal.manifest.version='4.0.0';
- await assert.rejects(f.host.sync());assert.deepEqual(f.notices,[],'no waiting launch: a member who uses Hugo is not nagged');
+ await assert.rejects(f.host.sync());assert.deepEqual(f.notices,[],'no waiting launch: a member who uses Jarvis is not nagged');
  for(let tick=0;tick<3;tick++){f.queue(f.launch);await assert.rejects(f.host.sync(),/has not been verified/)}
- assert.equal(f.notices.length,1);assert.match(f.notices[0],/Terminal 4\.0\.0 has not been verified.*Hugo at http:\/\/127\.0\.0\.1:3217/);
+ assert.equal(f.notices.length,1);assert.match(f.notices[0],/Terminal 4\.0\.0 has not been verified.*Jarvis at http:\/\/127\.0\.0\.1:3217/);
  f.host.dispose();const reloaded=new NativeDirectHost(f.options);f.queue(f.launch);await assert.rejects(reloaded.sync());
  assert.equal(f.notices.length,1,'the same session does not repeat it after a reload');
  assert.equal(f.calls.some(call=>call.path!=='/native/pending'),false);assert.equal(f.leaves.length,0);

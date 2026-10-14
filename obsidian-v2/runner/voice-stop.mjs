@@ -2,8 +2,8 @@
 // playback is cancelled by the client itself; these are the forms that reach
 // the bridge.
 const normalize=text=>String(text||'').normalize('NFKC').replace(/[’‘]/g,"'").replace(/[“”]/g,'"').replace(/\s+/g,' ').trim();
-const LEAD="(?:(?:hey|ok|okay|hugo|astra|please|wait|hold on|hang on|actually|no|oh|um|uh|er|hmm|so)[,\\s]+)*(?:(?:can|could|would|will) you(?: please)?\\s+)?";
-const STOP=new RegExp(`^${LEAD}(?:stop|cancel|abort|halt|kill|scratch)(?:\\s+(?:that|it|this|everything|the (?:task|job|work|run)|that (?:task|job)|working(?: on (?:that|it|this))?|what you(?:'re| are) doing|the (?:current|running) (?:task|job|work|conversation)))?(?:\\s+(?:the )?(?<provider>codex|claude)(?: (?:task|job|worker|conversation))?)?(?:\\s+(?:right )?now)?(?:[,\\s]+(?:please|hugo|astra|thanks))*[.!?\\s]*$`,'i');
+const LEAD="(?:(?:hey|ok|okay|jarvis|astra|please|wait|hold on|hang on|actually|no|oh|um|uh|er|hmm|so)[,\\s]+)*(?:(?:can|could|would|will) you(?: please)?\\s+)?";
+const STOP=new RegExp(`^${LEAD}(?:stop|cancel|abort|halt|kill|scratch)(?:\\s+(?:that|it|this|everything|the (?:task|job|work|run)|that (?:task|job)|working(?: on (?:that|it|this))?|what you(?:'re| are) doing|the (?:current|running) (?:task|job|work|conversation)))?(?:\\s+(?:the )?(?<provider>codex|claude)(?: (?:task|job|worker|conversation))?)?(?:\\s+(?:right )?now)?(?:[,\\s]+(?:please|jarvis|astra|thanks))*[.!?\\s]*$`,'i');
 // Returns {provider} (null when none was named) or null when this is not a stop.
 export function stopIntent(text){const match=STOP.exec(normalize(text));return match?{provider:match.groups.provider?.toLowerCase()||null}:null}
 
@@ -23,8 +23,8 @@ export function supersedeIntent(text){const t=normalize(text);return SUPERSEDE.t
 // rest may also end at a comma. A pleasantry alone stays small talk.
 const SOFT="(?:hey|hi|hello|yo|ok|okay|alright|all right|got it|sounds good|thanks(?: a lot| so much)?|thank you(?: so much| very much)?|appreciate (?:it|that)|good (?:morning|afternoon|evening)|can you hear me|are you there|you there|mic check|testing(?: testing)?|loud and clear)";
 const ADJECTIVE="(?:cool|nice|great|perfect|sweet|awesome)";
-const PLEASANTRY=new RegExp(`^(?:(?:${SOFT}(?:\\s+(?:hugo|astra|man))?(?:[,.!?;:]+\\s*|\\s+(?=(?:hugo|astra)\\b))|${ADJECTIVE}(?:\\s+(?:hugo|astra|man))?[.!?]+\\s*))+`,'i');
-const DISCOURSE=/^(?:(?:hugo|astra|okay|ok)(?:[,.!?;:\s]+|$))+/i;
+const PLEASANTRY=new RegExp(`^(?:(?:${SOFT}(?:\\s+(?:jarvis|astra|man))?(?:[,.!?;:]+\\s*|\\s+(?=(?:jarvis|astra)\\b))|${ADJECTIVE}(?:\\s+(?:jarvis|astra|man))?[.!?]+\\s*))+`,'i');
+const DISCOURSE=/^(?:(?:jarvis|astra|okay|ok)(?:[,.!?;:\s]+|$))+/i;
 export function stripPleasantry(text){
  const original=String(text||'').trim();
  if(!PLEASANTRY.test(original))return original;

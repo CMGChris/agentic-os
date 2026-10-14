@@ -2,7 +2,7 @@ param(
  [switch]$InstallAtLogon,
  [switch]$IncludePreview,
  [switch]$ResetRecovery,
- [string]$HugoRoot = (Join-Path $PSScriptRoot '..\..\hugo-v2'),
+ [string]$JarvisRoot = (Join-Path $PSScriptRoot '..\..\jarvis-v2'),
  [string]$SpeechUrl = $env:AOS_V2_SPEECH_URL
 )
 $ErrorActionPreference='Stop'
@@ -42,12 +42,12 @@ if($SpeechUrl){$taskEnv.AOS_V2_SPEECH_URL=$SpeechUrl}
 if(Test-Path -LiteralPath (Join-Path $taskRuntime 'vault.json')){$taskEnv.AOS_V2_VAULT=(Get-Content -LiteralPath (Join-Path $taskRuntime 'vault.json') -Raw | ConvertFrom-Json).vault}
 $taskServices=@(@{id='bridge';port=3219;command=$taskNode;args=@((Join-Path $taskRoot 'runner\bridge.mjs'));cwd=$taskRoot;env=$taskEnv})
 if($IncludePreview){$taskServices+=@{id='preview';port=3218;command=$taskNode;args=@((Join-Path $taskRoot 'preview\server.mjs'));cwd=$taskRoot;env=$taskEnv}}
-if(Test-Path -LiteralPath (Join-Path $HugoRoot '.next\BUILD_ID')){
- $taskHugo=(Resolve-Path $HugoRoot).Path
- $taskServices+=@{id='hugo';port=3217;command=$taskNode;args=@((Join-Path $taskHugo 'node_modules\next\dist\bin\next'),'start','--hostname','127.0.0.1','--port','3217');cwd=$taskHugo}
+if(Test-Path -LiteralPath (Join-Path $JarvisRoot '.next\BUILD_ID')){
+ $taskJarvis=(Resolve-Path $JarvisRoot).Path
+ $taskServices+=@{id='jarvis';port=3217;command=$taskNode;args=@((Join-Path $taskJarvis 'node_modules\next\dist\bin\next'),'start','--hostname','127.0.0.1','--port','3217');cwd=$taskJarvis}
 }
 if($taskSupervisor -and @($taskServices | Where-Object {$_.id -notin @($taskSupervisor.services.id)}).Count){
- # Reconfigure the monitor alone when an existing installation adds preview/Hugo.
+ # Reconfigure the monitor alone when an existing installation adds preview/Jarvis.
  [System.IO.File]::WriteAllText($taskPauseFile,'{"reason":"recovery services changed"}',[System.Text.UTF8Encoding]::new($false))
  for($taskAttempt=0;$taskAttempt -lt 20;$taskAttempt++){
   Start-Sleep -Milliseconds 500
@@ -56,12 +56,12 @@ if($taskSupervisor -and @($taskServices | Where-Object {$_.id -notin @($taskSupe
  if($taskSupervisor){throw 'The recovery monitor is still reconfiguring; try again shortly.'}
 }
 if(!$taskSupervisor){
- # Subsequent normal starts keep the configured set of services, including Hugo.
+ # Subsequent normal starts keep the configured set of services, including Jarvis.
  if(Test-Path -LiteralPath $taskConfigFile){
   $taskPrior=Get-Content -LiteralPath $taskConfigFile -Raw | ConvertFrom-Json
   if($taskPrior.runtimeDir -ne $taskRuntime){throw 'Recovery configuration belongs to another installation.'}
   foreach($taskService in $taskPrior.services){
-   if($taskService.id -notin @($taskServices.id) -and $taskService.id -in @('preview','hugo')){$taskServices+=$taskService}
+   if($taskService.id -notin @($taskServices.id) -and $taskService.id -in @('preview','jarvis')){$taskServices+=$taskService}
   }
  }
  $taskConfig=@{runtimeDir=$taskRuntime;lockPort=3221;services=$taskServices}

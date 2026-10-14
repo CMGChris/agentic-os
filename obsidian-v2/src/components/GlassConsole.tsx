@@ -3,7 +3,7 @@ import {MetricCard} from './MetricCard';
 import {LatestVideoCard} from './LatestVideoCard';
 import { h, Fragment } from "preact";
 import { Notice } from "obsidian";
-import type CuriosityCommandCenter from "../main";
+import type ChaseCommandCenter from "../main";
 import type { MetricSnapshot } from "../lib/metrics";
 import type { DailyNoteRead } from "../lib/vault";
 import { toggleTaskByText } from "../lib/vault-writer";
@@ -17,7 +17,7 @@ import { ActionBar } from "./ActionBar";
 // header, and tabs live in Cockpit so every tab shares them.
 
 interface Props {
-	plugin: CuriosityCommandCenter;
+	plugin: ChaseCommandCenter;
 	snapshots: Map<string, MetricSnapshot> | null;
 	daily: DailyNoteRead | null;
 	latestVideo: LatestVideo | null;

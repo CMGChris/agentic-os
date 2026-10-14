@@ -188,7 +188,7 @@ test('configuration fails closed',()=>{
 });
 test('the state sent to Jev is minimal and capped at 4 KB',()=>{
  const long='x'.repeat(20000);
- const state=jevState({transcript:long,separateTasks:true,target:{title:long,state:'ready',turns:[{text:long}],secret:'never'},exchanges:Array.from({length:6},()=>({you:long,hugo:long,pendingSkill:'content-cascade',lookup:{plan:['private']}})),reports:Array.from({length:60},(_,i)=>`report-${i}`)});
+ const state=jevState({transcript:long,separateTasks:true,target:{title:long,state:'ready',turns:[{text:long}],secret:'never'},exchanges:Array.from({length:6},()=>({you:long,jarvis:long,pendingSkill:'content-cascade',lookup:{plan:['private']}})),reports:Array.from({length:60},(_,i)=>`report-${i}`)});
  assert.ok(Buffer.byteLength(JSON.stringify(state))<=4096);
  assert.deepEqual(Object.keys(state).sort(),['flags','recent_exchanges','saved_reports','selected_task','transcript']);
  assert.ok(state.recent_exchanges.length<=2);assert.equal(JSON.stringify(state).includes('never'),false);assert.equal(JSON.stringify(state).includes('private'),false);

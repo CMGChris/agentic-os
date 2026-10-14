@@ -59,7 +59,7 @@ class DashboardModal extends Modal {
   this.busy = true; this.message = ''; this.render();
   try {
    await saveDashboard(this.app, this.value.revision, this.draft);
-   new Notice('Dashboard updated in Obsidian and Hugo.');
+   new Notice('Dashboard updated in Obsidian and Jarvis.');
    this.close();
   } catch (error) {
    this.message = `${error instanceof Error ? error.message : String(error)} Your unsaved selection is still here. Reload saved selection to start from the latest settings.`;
@@ -100,7 +100,7 @@ class DashboardModal extends Modal {
   const root = this.contentEl;
   root.empty();
   root.createEl('h2', { text: 'Customize dashboard' });
-  root.createEl('p', { text: `Choose up to ${MAX_DASHBOARD_SKILLS} buttons and arrange them in the order you use them. Your saved selection appears in both Obsidian and Hugo.` });
+  root.createEl('p', { text: `Choose up to ${MAX_DASHBOARD_SKILLS} buttons and arrange them in the order you use them. Your saved selection appears in both Obsidian and Jarvis.` });
   if (this.message) {
    const message = root.createEl('p', { text: this.message });
    message.setAttribute('role', 'status'); message.style.whiteSpace = 'pre-wrap';
@@ -118,7 +118,7 @@ class DashboardModal extends Modal {
   this.button(controls, 'Clear buttons', () => this.mutate([]), !editable);
   this.button(controls, 'Reload saved selection', () => void this.reload());
   root.createEl('h3', { text: `Selected buttons (${ids.length}/${MAX_DASHBOARD_SKILLS})` });
-  if (this.draft === null) root.createEl('p', { text: 'Using defaults: Obsidian keeps its starter buttons and Hugo keeps its compact starter row.' });
+  if (this.draft === null) root.createEl('p', { text: 'Using defaults: Obsidian keeps its starter buttons and Jarvis keeps its compact starter row.' });
   const selected = root.createEl('ol'); selected.setAttribute('aria-label', 'Selected dashboard buttons');
   for (const [index, id] of ids.entries()) {
    const skill = this.value.catalog.find(item => item.id === id);

@@ -350,7 +350,7 @@ test('every run prints every line, even with the bridge down or no vault configu
   const install = installation(); fs.rmSync(install.at.vaultFile);
   const found = await examine(services, install, {full: true});
   const expected = ['Node.js 22 or newer', 'Vault configured', 'Vault has the daily-note schema', 'Obsidian plugin files installed', 'Plugin switched on in Obsidian',
-    TERMINAL, 'Python helper for conversations inside Obsidian', 'Recovery monitor running', `Bridge answering on ${services.ports.bridge}`, `Hugo HUD answering on ${services.ports.hugo}`, 'claude CLI', 'codex CLI', VOICE[0], HOTKEY, ...VOICE.slice(1), 'Jev fast voice routing', 'A real workflow end to end'];
+    TERMINAL, 'Python helper for conversations inside Obsidian', 'Recovery monitor running', `Bridge answering on ${services.ports.bridge}`, `Jarvis HUD answering on ${services.ports.jarvis}`, 'claude CLI', 'codex CLI', VOICE[0], HOTKEY, ...VOICE.slice(1), 'Jev fast voice routing', 'A real workflow end to end'];
   assert.deepEqual(found.results.map(item => item.name), expected);
   for (const name of ['Vault has the daily-note schema', 'claude CLI', ...VOICE, HOTKEY, 'A real workflow end to end']) { assert.equal(found.line(name).status, 'SKIP', name); assert.match(found.line(name).detail, /not (run|checked)/); }
   assert.equal(found.line(TERMINAL).status, 'SKIP'); assert.match(found.line(TERMINAL).detail, /no vault configured/);
@@ -369,7 +369,7 @@ test('the Terminal plugin line reports every state from the vault files and neve
     return terminalPluginCheck(vault);
   };
   const cases = [
-    [{}, 'SKIP', /not installed \(optional: .*Hugo/],
+    [{}, 'SKIP', /not installed \(optional: .*Jarvis/],
     [{manifest: {id: 'terminal', version: '3.27.2'}}, 'PASS', /^3\.27\.2$/],
     [{manifest: {id: 'terminal', version: '3.27.1'}}, 'PASS', /^3\.27\.1$/],
     [{manifest: {id: 'terminal', version: '3.28.0'}}, 'PASS', /3\.28\.0, newer than the tested 3\.27\.1 and 3\.27\.2; it should work/],
@@ -382,7 +382,7 @@ test('the Terminal plugin line reports every state from the vault files and neve
     [{manifest: {id: 'someone-else', version: '1.0.0'}}, 'SKIP', /different plugin/],
     [{manifest: {id: 'terminal', version: '3.27.2'}, enabled: '{not json'}, 'SKIP', /could not read the enabled-plugins list/],
   ];
-  for (const [state, status, detail] of cases) { const check = set(state); assert.equal(check.status, status, JSON.stringify(state)); assert.match(check.detail, detail, JSON.stringify(state)); if (status === 'FAIL') assert.match(check.fix, /Hugo at http:\/\/127\.0\.0\.1:3217/); }
+  for (const [state, status, detail] of cases) { const check = set(state); assert.equal(check.status, status, JSON.stringify(state)); assert.match(check.detail, detail, JSON.stringify(state)); if (status === 'FAIL') assert.match(check.fix, /Jarvis at http:\/\/127\.0\.0\.1:3217/); }
   assert.match(set({manifest: {id: 'terminal', version: '3.26.0'}}).fix, /too old/);
   assert.equal(terminalPluginCheck(path.join(vault, 'missing')).status, 'SKIP');
   assert.equal(terminalPluginCheck(undefined).status, 'SKIP');
@@ -471,16 +471,16 @@ test('setup and start decide about voice the same way: a healthy shared service 
   await update({root: updating.root, log: () => {}, check: () => ({updateAllowed: true}), get: async () => null, pull: () => calls.push('pull'), install: async options => { calls.push(options); return {ok: true}; }});
   assert.equal(calls[0], 'pull'); assert.equal('voice' in calls[1], false); assert.equal(calls[1].rebuild, true); assert.equal(calls[1].vault, updating.vault);
 
-  assert.deepEqual(watchedServices({services: [{id: 'bridge'}, {id: 'hugo'}]}), ['bridge', 'hugo'], 'a borrowed voice is not waited for');
-  assert.deepEqual(watchedServices({services: [{id: 'bridge'}, {id: 'hugo'}, {id: 'speech'}, {id: 'preview'}]}), ['bridge', 'hugo', 'speech']);
-  assert.deepEqual(watchedServices(null), ['bridge', 'hugo']);
+  assert.deepEqual(watchedServices({services: [{id: 'bridge'}, {id: 'jarvis'}]}), ['bridge', 'jarvis'], 'a borrowed voice is not waited for');
+  assert.deepEqual(watchedServices({services: [{id: 'bridge'}, {id: 'jarvis'}, {id: 'speech'}, {id: 'preview'}]}), ['bridge', 'jarvis', 'speech']);
+  assert.deepEqual(watchedServices(null), ['bridge', 'jarvis']);
 });
 
 test('local requests: one connection each, local addresses only, binary both ways, a real timeout; a program is run without freezing this one', async () => {
   const services = await fakeServices({speech: 'shared', keepAliveMs: 150});
   const local = port => `http://127.0.0.1:${port}`;
   // The doctor's order: monitor, bridge, HUD; then frozen; then the bridge again.
-  for (const port of [services.ports.supervisor, services.ports.bridge, services.ports.hugo]) assert.equal((await fetchJson(`${local(port)}/services`)).status, 200);
+  for (const port of [services.ports.supervisor, services.ports.bridge, services.ports.jarvis]) assert.equal((await fetchJson(`${local(port)}/services`)).status, 200);
   freeze(2500);
   assert.equal((await fetchJson(`${local(services.ports.bridge)}/voice/health`)).data.ok, true);
 

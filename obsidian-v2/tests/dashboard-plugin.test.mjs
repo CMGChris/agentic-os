@@ -96,8 +96,8 @@ test('missing and incompatible installed skills remain visible with specific rea
 
 test('stock skills retain the background queue path and preserve argument values', async () => {
  const f = fixture(), app = {};
- await dashboard.launchDashboardSkill(app, { ...stock, id: 'deep-research-curiosity', arg: 'topic' }, 'research topic');
- assert.deepEqual(f.stock, [{ app, id: 'deep-research-curiosity', args: { topic: 'research topic' } }]);
+ await dashboard.launchDashboardSkill(app, { ...stock, id: 'deep-research-chase', arg: 'topic' }, 'research topic');
+ assert.deepEqual(f.stock, [{ app, id: 'deep-research-chase', args: { topic: 'research topic' } }]);
  assert.equal(f.calls.length, 0);
  assert.equal(f.opened.length, 0);
 });
@@ -142,12 +142,12 @@ test('missing or unsupported native Terminal prevents session writes and pending
  const f = fixture();
  const withoutManifest = { ...nativeApp(null), plugins: { plugins: { terminal: {} } } };
  const expected = [
-  [nativeApp(null), /Enable the Terminal community plugin \(by polyipseity\).*Hugo at http:\/\/127\.0\.0\.1:3217/],
+  [nativeApp(null), /Enable the Terminal community plugin \(by polyipseity\).*Jarvis at http:\/\/127\.0\.0\.1:3217/],
   [withoutManifest, /Enable the Terminal community plugin/],
   [nativeApp(''), /Enable the Terminal community plugin/],
-  [nativeApp('0.0.0'), /too old.*Hugo at http:\/\/127\.0\.0\.1:3217/],
+  [nativeApp('0.0.0'), /too old.*Jarvis at http:\/\/127\.0\.0\.1:3217/],
   [nativeApp('3.28.0-beta.1'), /Pre-release/],
-  [nativeApp('4.0.0'), /has not been verified.*Hugo at http:\/\/127\.0\.0\.1:3217/],
+  [nativeApp('4.0.0'), /has not been verified.*Jarvis at http:\/\/127\.0\.0\.1:3217/],
  ];
  for (const [app, message] of expected) await assert.rejects(dashboard.launchDashboardSkill(app, installed, 'Write a proposal'), message);
  assert.equal(f.events.includes('session'), false);

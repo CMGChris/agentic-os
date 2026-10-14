@@ -1,9 +1,9 @@
 import { h } from 'preact';
 import { useState } from 'preact/hooks';
-import type CuriosityCommandCenter from '../main';
+import type ChaseCommandCenter from '../main';
 import { saveSelection, type Provider, type useProvider } from '../lib/provider';
 import { MODELS } from '../../shared/contract.mjs';
-export function ProviderPanel({plugin,state,busy}:{plugin:CuriosityCommandCenter;state:ReturnType<typeof useProvider>;busy:boolean}){
+export function ProviderPanel({plugin,state,busy}:{plugin:ChaseCommandCenter;state:ReturnType<typeof useProvider>;busy:boolean}){
  const [saving,setSaving]=useState(false),[error,setError]=useState('');
  const choose=async(provider:Provider,model=MODELS[provider][0]!)=>{if(saving||(provider===state.selection.provider&&model===state.selection.model))return;setSaving(true);try{await saveSelection(plugin.app,{provider,model});setError('')}catch(e){setError(String(e))}finally{setSaving(false)}};
  const current=state.selection.provider;

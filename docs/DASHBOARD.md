@@ -1,6 +1,6 @@
 # Make the dashboard yours
 
-Choose **Customize dashboard** in the Obsidian cockpit or the Hugo HUD. Pick up to ten buttons, change their order, and save. The same selection appears in both places within a few seconds.
+Choose **Customize dashboard** in the Obsidian cockpit or the Jarvis HUD. Pick up to ten buttons, change their order, and save. The same selection appears in both places within a few seconds.
 
 - **Keep the defaults:** before you personalize, Obsidian keeps its original ten buttons and the HUD keeps its four. Restoring defaults returns each app to that layout.
 - **Choose your own:** your saved list replaces both sets of quick buttons. You can choose fewer than ten, or none. The full workflow browser stays available.
@@ -15,7 +15,7 @@ Use **Find installed skills** to discover skills in the standard folders for you
 
 Personal skills open an ordinary conversation in Claude Code or Codex. Enter what you want the skill to do; questions and approvals appear in the terminal. A registered file is not a guarantee that its connectors, helper tools or accounts are ready. If they are missing, finish that setup in the conversation.
 
-Running a personal skill inside Obsidian needs the **Terminal** community plugin (by polyipseity) enabled: any stable 3.x release from 3.27.1 on; 3.27.1 and 3.27.2 are tested, newer ones show a one-time notice, pre-releases are not supported. If you prefer not to install it, use the same button in the Hugo HUD. Bundled background workflows do not need that plugin.
+Running a personal skill inside Obsidian needs the **Terminal** community plugin (by polyipseity) enabled: any stable 3.x release from 3.27.1 on; 3.27.1 and 3.27.2 are tested, newer ones show a one-time notice, pre-releases are not supported. If you prefer not to install it, use the same button in the Jarvis HUD. Bundled background workflows do not need that plugin.
 
 A skill is tied to the provider or providers it was registered for. Switching providers can disable an incompatible button. A missing or changed skill file is also disabled; re-register the reviewed file to use its new version. Skills are never downloaded or executed merely because they were found.
 
@@ -34,7 +34,7 @@ node aos.mjs dashboard discover --provider codex
 `list` returns the catalog, saved selection and a `revision`. Use that revision when changing the configuration:
 
 ```text
-node aos.mjs dashboard select --skills "plan-today,deep-research-curiosity,weekly-review" --revision "<revision>"
+node aos.mjs dashboard select --skills "plan-today,deep-research-chase,weekly-review" --revision "<revision>"
 node aos.mjs dashboard add --path "<absolute path to SKILL.md>" --provider claude --revision "<revision>"
 node aos.mjs dashboard reset --revision "<revision>"
 ```

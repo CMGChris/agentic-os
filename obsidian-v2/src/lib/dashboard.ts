@@ -155,7 +155,7 @@ export async function launchDashboardSkill(app: App, skill: DashboardSkill, inpu
  const { plugin: terminal, support } = terminalPluginStatus(app);
  if (native && (!terminal || support.status === 'missing' || support.status === 'unsupported')) {
   throw new Error(support.status === 'missing'
-   ? 'Enable the Terminal community plugin (by polyipseity) to run personal skills inside Obsidian, or use the same skill button in Hugo at http://127.0.0.1:3217.'
+   ? 'Enable the Terminal community plugin (by polyipseity) to run personal skills inside Obsidian, or use the same skill button in Jarvis at http://127.0.0.1:3217.'
    : support.message);
  }
  await workConversations.startSession();

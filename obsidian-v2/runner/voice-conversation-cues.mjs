@@ -6,7 +6,7 @@ const starts=["Sure, I'll get started.","Okay, I'll work on that.","Let me get t
 const followups=["Sure, let me work through that.","Okay, I'll take a look.","All right, I'm on it.","Let me see what I can do.","Sure, I'll work on that.","Okay, let me handle that.","I'll take it from here.","Let me get into that."];
 const workflowObjects={
  'vault-summary':'the vault summary','plan-today':"today's plan",'plan-tomorrow':"tomorrow's plan",'refresh-schedule':'the schedule update',
- 'morning-intel':'the intel brief','inbox-brief':'the inbox brief','deep-research-curiosity':'the research','content-cascade':'the content drafts',
+ 'morning-intel':'the intel brief','inbox-brief':'the inbox brief','deep-research-chase':'the research','content-cascade':'the content drafts',
  'yt-pipeline':'the YouTube research','weekly-review':'the weekly review','vault-cleanup':'the vault review','metrics-pull':'the metrics refresh',
  'github-trending':'the GitHub update','yt-week-review':'the YouTube review','outlier-radar':'the outlier scan','lead-research':'the lead research',
  'morning':'the morning brief','morning-report':'the morning report','ai-trend-scan':'the AI trend scan','angle-brainstorm':'the brainstorm',

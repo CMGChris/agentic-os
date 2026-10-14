@@ -29,7 +29,7 @@ const ownPort = state.speech === 'own' ? speechPort : sparePort;
 const speechUrl = () => `http://127.0.0.1:${state.speech === 'none' ? ownPort : speechPort}`;
 
 const monitor = http.createServer(options, (req, res) => { monitorSeen.push(`${req.method} ${req.url}`); json(res, 200, {kind: 'agentic-os-service-supervisor', services: [
-  {id: 'bridge', phase: 'online'}, {id: 'hugo', phase: 'online'}, ...(state.speech === 'own' || state.monitorRunsSpeech ? [{id: 'speech', phase: state.speechPhase}] : [])]}); });
+  {id: 'bridge', phase: 'online'}, {id: 'jarvis', phase: 'online'}, ...(state.speech === 'own' || state.monitorRunsSpeech ? [{id: 'speech', phase: state.speechPhase}] : [])]}); });
 const hud = http.createServer(options, (req, res) => json(res, 200, {ok: true}));
 const bridge = http.createServer(options, async (req, res) => {
   bridgeSeen.push(`${req.method} ${req.url}`);
@@ -43,7 +43,7 @@ const bridge = http.createServer(options, async (req, res) => {
 });
 
 bridge.on('connection', () => connections.bridge++); monitor.on('connection', () => connections.monitor++);
-const ports = {supervisor: await listen(monitor), bridge: await listen(bridge), hugo: await listen(hud), speech: ownPort};
+const ports = {supervisor: await listen(monitor), bridge: await listen(bridge), jarvis: await listen(hud), speech: ownPort};
 parentPort.on('message', message => {
   if (message.set) { Object.assign(state, message.set); parentPort.postMessage({done: true}); }
   if (message.report) parentPort.postMessage({seen: {speech: [...speech.seen], bridge: [...bridgeSeen], monitor: [...monitorSeen], connections: {...connections}}});

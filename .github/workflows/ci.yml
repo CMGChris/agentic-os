@@ -30,7 +30,7 @@ jobs:
         working-directory: obsidian-v2
         run: npm ci --no-audit --no-fund
       - name: HUD packages
-        working-directory: hugo-v2
+        working-directory: jarvis-v2
         run: npm ci --no-audit --no-fund
       - name: Build the plugin
         working-directory: obsidian-v2
@@ -54,7 +54,7 @@ jobs:
         working-directory: obsidian-v2
         run: node --test --test-concurrency=2 --test-timeout=90000 "tests/*.test.mjs"
       - name: HUD typecheck and tests
-        working-directory: hugo-v2
+        working-directory: jarvis-v2
         run: |
           npm run typecheck
           npm test

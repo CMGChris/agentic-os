@@ -112,16 +112,16 @@ test('whatever the settings, shadow never exits early and off never asks Jev',as
 
 // The veto runs before either classifier starts, on the event loop. It must stay fast on any input.
 test('the open door answers in bounded time on runs of filler words that end in something else',()=>{
- const fillers=['on screen','on the screen','on my screen','up on screen','up on the screen','for me','please','thanks','thank you','hugo','astra','again','real quick','really quick','quickly','right now','now','in obsidian','inside obsidian','inside of obsidian'];
- const leads=['hey','hi','hello','ok','okay','all right','alright','so','well','um','uh','hugo','astra','please','just','now','also','actually','and','then','yeah','yes','no'];
+ const fillers=['on screen','on the screen','on my screen','up on screen','up on the screen','for me','please','thanks','thank you','jarvis','astra','again','real quick','really quick','quickly','right now','now','in obsidian','inside obsidian','inside of obsidian'];
+ const leads=['hey','hi','hello','ok','okay','all right','alright','so','well','um','uh','jarvis','astra','please','just','now','also','actually','and','then','yeah','yes','no'];
  const hostile=['Can I see x'+' on screen'.repeat(24)+' z'];
  for(const filler of fillers)for(const tail of [' z','',' on',',']){let text='Can I see x';while((text+' '+filler+tail).length<=300)text+=' '+filler;hostile.push(text+tail);hostile.push(text.replace('Can I see x','show me x')+tail)}
  for(const lead of leads){let text='';while((text+lead+' open x').length<=300)text+=lead+' ';hostile.push(text+'open x');hostile.push(text+'z')}
  hostile.push('show me '+'a'.repeat(290),'open '+'x '.repeat(140),'pull '+'up '.repeat(95)+'x','can you '.repeat(37)+'open x');
  // The UI door refuses anything over 160 characters before it parses, so it gets its own runs that fit.
- const uiFillers=['for me','please','thanks','thank you','hugo','astra','real quick','really quick','quickly','right now','now'];
+ const uiFillers=['for me','please','thanks','thank you','jarvis','astra','real quick','really quick','quickly','right now','now'];
  for(const filler of uiFillers)for(const tail of [' z','',' no',',']){let text='close this tab';while((text+' '+filler+tail).length<=160)text+=' '+filler;hostile.push(text+tail)}
- for(const lead of ['hey','hi','hello','ok','okay','all right','alright','so','well','um','uh','hugo','astra','please','just','now']){let text='';while((text+lead+' close this tab').length<=160)text+=lead+' ';hostile.push(text+'close this tab');hostile.push(text+'z')}
+ for(const lead of ['hey','hi','hello','ok','okay','all right','alright','so','well','um','uh','jarvis','astra','please','just','now']){let text='';while((text+lead+' close this tab').length<=160)text+=lead+' ';hostile.push(text+'close this tab');hostile.push(text+'z')}
  hostile.push('can you '.repeat(18)+'close this tab','could you please '.repeat(8)+'go back','close '+'this '.repeat(30)+'tab');
  assert.ok(hostile.filter(text=>text.length<=160).length>=60);
  const started=performance.now();

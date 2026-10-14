@@ -75,7 +75,7 @@ const referenceDependencies={
  'outlier-radar':['youtube-data'],
  'ai-trend-scan':['youtube-data'],
  'yt-pipeline':['youtube-data'],
- 'deep-research-curiosity':['yt-pipeline','youtube-data'],
+ 'deep-research-chase':['yt-pipeline','youtube-data'],
  'weekly-review':['yt-week-review']
 };
 const referenceFree=new Set(['vault-summary','refresh-schedule','voice-ask']);

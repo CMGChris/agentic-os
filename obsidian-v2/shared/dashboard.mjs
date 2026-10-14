@@ -1,8 +1,8 @@
 // One saved order is shared by both dashboards. Null retains each surface's
 // existing defaults; an empty array deliberately hides every quick button.
 export const MAX_DASHBOARD_SKILLS = 10;
-export const DEFAULT_COCKPIT_SKILLS = Object.freeze(['plan-today','inbox-brief','morning-intel','metrics-pull','weekly-review','deep-research-curiosity','yt-pipeline','angle-brainstorm','outline-build','content-cascade']);
-export const DEFAULT_HUD_SKILLS = Object.freeze(['plan-today','inbox-brief','deep-research-curiosity','content-cascade']);
+export const DEFAULT_COCKPIT_SKILLS = Object.freeze(['plan-today','inbox-brief','morning-intel','metrics-pull','weekly-review','deep-research-chase','yt-pipeline','angle-brainstorm','outline-build','content-cascade']);
+export const DEFAULT_HUD_SKILLS = Object.freeze(['plan-today','inbox-brief','deep-research-chase','content-cascade']);
 export const isInstalledSkill = id => typeof id === 'string' && /^installed:[a-f0-9]{24}$/.test(id);
 
 export function validateDashboardSelection(selected, knownIds) {

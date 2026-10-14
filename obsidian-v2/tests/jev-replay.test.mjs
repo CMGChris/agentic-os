@@ -12,7 +12,7 @@ test('an explicit new task is replayed in the epoch before its reset, and its ca
  const {cases}=buildReplayCases([request,answer]);
  assert.equal(cases.length,1);
  assert.equal(cases[0].transcript,'tell me more about that answer');assert.equal(cases[0].state.newConversation,true);
- assert.deepEqual(cases[0].state.exchanges,[{you:'What was the biggest AI story today?',hugo:'From the saved brief: the RubyGems incident.',lookupRoute:'local'}]);
+ assert.deepEqual(cases[0].state.exchanges,[{you:'What was the biggest AI story today?',jarvis:'From the saved brief: the RubyGems incident.',lookupRoute:'local'}]);
  assert.ok(cases[0].reconstruction.some(note=>/pre-reset epoch/.test(note)));
 });
 test('the carried reference respects the three-minute window measured from routing time, and work is never carried',()=>{

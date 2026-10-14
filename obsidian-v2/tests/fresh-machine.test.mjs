@@ -205,7 +205,7 @@ test('a failed repair removes the record even though the old python file is stil
   assert.equal(fs.existsSync(good.python), true, 'the interpreter file is still present');
   assert.equal(fs.existsSync(terminalMarker(install.runtime)), false);
   assert.equal(recordedTerminalPython(install.runtime, {platform}), null);
-  assert.match(said.at(-1), /could not be prepared.*use the same buttons in Hugo/);
+  assert.match(said.at(-1), /could not be prepared.*use the same buttons in Jarvis/);
 });
 
 test('the helper environment is never repaired or replaced while a conversation may be using it', () => {
@@ -246,7 +246,7 @@ test('the doctor asks for the helper only once the Terminal plugin is in use', (
   const broken = terminalPythonCheck('/r', {terminal: {status: 'PASS'}, recorded: () => '/r/py', works: () => false});
   assert.equal(broken.status, 'FAIL'); assert.match(broken.detail, /no longer runs or loads/);
   const missing = terminalPythonCheck('/r', {terminal: {status: 'PASS'}, recorded: () => null});
-  assert.equal(missing.status, 'FAIL'); assert.match(missing.fix, /node aos\.mjs setup.*Hugo at http:\/\/127\.0\.0\.1:3217/);
+  assert.equal(missing.status, 'FAIL'); assert.match(missing.fix, /node aos\.mjs setup.*Jarvis at http:\/\/127\.0\.0\.1:3217/);
 });
 
 test('the bridge hands the plugin the managed Python only when setup recorded one', t => {

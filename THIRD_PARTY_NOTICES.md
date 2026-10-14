@@ -12,8 +12,8 @@ These fonts retain the SIL Open Font License 1.1. Their existing notices include
 
 | Font | License notice |
 |---|---|
-| Big Shoulders | [OFL 1.1](hugo-v2/public/fonts/Big-Shoulders-OFL.txt) |
-| Martian Mono | [OFL 1.1](hugo-v2/public/fonts/Martian-Mono-OFL.txt) |
+| Big Shoulders | [OFL 1.1](jarvis-v2/public/fonts/Big-Shoulders-OFL.txt) |
+| Martian Mono | [OFL 1.1](jarvis-v2/public/fonts/Martian-Mono-OFL.txt) |
 | IBM Plex Mono | [OFL 1.1](obsidian-v2/assets/fonts/IBM-Plex-Mono-OFL.txt) |
 | Space Grotesk | [OFL 1.1](obsidian-v2/assets/fonts/Space-Grotesk-OFL.txt) |
 

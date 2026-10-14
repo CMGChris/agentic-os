@@ -46,7 +46,7 @@ test('channel reviews use the trusted YouTube reader without requiring unrelated
 });
 
 test('YouTube research workflows share the trusted metadata connection on both providers',t=>{
- for(const provider of ['claude','codex'])for(const skill of ['morning','morning-report','morning-intel','outlier-radar','ai-trend-scan','yt-pipeline','deep-research-curiosity']){
+ for(const provider of ['claude','codex'])for(const skill of ['morning','morning-report','morning-intel','outlier-radar','ai-trend-scan','yt-pipeline','deep-research-chase']){
   const {instructions}=setup(t,skill,provider);
   assert.match(instructions,/BUNDLED RUBRIC: youtube-data/,skill);
   assert.match(instructions,/youtube_research_data/,skill);
@@ -61,7 +61,7 @@ test('the eight missing rubrics and their dependencies are available inline',t=>
   'plan-today':[/\+50/,/\+40/,/\+30/,/\+25/,/\+20/,/\+15/,/empty slots/],
   'plan-tomorrow':[/carryover/i,/tomorrow/i,/calendar/i],
   'inbox-brief':[/Leads/,/Urgent/,/Warm/,/Sponsor/,/Meetings/,/Noise/,/PURSUE/],
-  'deep-research-curiosity':[/YouTube/,/GitHub/,/BUNDLED RUBRIC: yt-pipeline/,/actual.*transcripts/i],
+  'deep-research-chase':[/YouTube/,/GitHub/,/BUNDLED RUBRIC: yt-pipeline/,/actual.*transcripts/i],
   'weekly-review':[/focus_blocks/,/no note/,/BUNDLED RUBRIC: yt-week-review/,/Climbing/],
   'yt-week-review':[/180/,/150/,/60/,/140/],
   'morning':[/BUNDLED RUBRIC: morning-report/,/BUNDLED RUBRIC: inbox-brief/,/Leads/],
@@ -147,7 +147,7 @@ test('restored shared rubrics retain sources, labels, handoff data and user sele
   for(const term of ['pursue all','pursue 1,3','draft except 3,7','pass','skip','creates no drafts or remote mutations','No drafting request implies sending'])assert.ok(morning.includes(term),term);
   const cleanup=setup(t,'vault-cleanup',provider).instructions;
   for(const term of ['unique filename','Path-qualified wiki links','Temp Files to Delete','content/temp/','do not delete anything during this initial run','re-read the selected source'])assert.ok(cleanup.includes(term),term);
-  const research=setup(t,'deep-research-curiosity',provider).instructions;
+  const research=setup(t,'deep-research-chase',provider).instructions;
   for(const term of ["What's the consensus?",'Best practices','How to','Community activity'])assert.ok(research.includes(term),term);
  }
 });

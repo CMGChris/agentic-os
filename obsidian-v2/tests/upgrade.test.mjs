@@ -34,10 +34,10 @@ function starter(home) {
   put(root, 'obsidian-v2/manifest.json', {id: 'agentic-os-v2', name: 'Agentic OS V2', version: '0.3.64'});
   put(root, 'obsidian-v2/package.json', {name: 'agentic-os-v2'});
   put(root, 'obsidian-v2/scripts/aos.mjs', '// fixture command\n');
-  put(root, 'hugo-v2/package.json', {name: 'hugo-v2', version: '2.0.0-preview.28'});
+  put(root, 'jarvis-v2/package.json', {name: 'jarvis-v2', version: '2.0.0-preview.28'});
   put(root, '.gitignore', 'obsidian-v2/.runtime/\n');
   git(root, 'init', '-q', '-b', 'main'); git(root, 'add', '.'); git(root, 'commit', '-q', '-m', 'fixture baseline');
-  git(root, 'remote', 'add', 'origin', 'https://github.com/CMGChris/agentic-os.git');
+  git(root, 'remote', 'add', 'origin', 'https://github.com/ctskool/agentic-os-starter-v2.git');
   git(root, 'update-ref', 'refs/remotes/origin/main', 'HEAD');
   git(root, 'config', 'branch.main.remote', 'origin'); git(root, 'config', 'branch.main.merge', 'refs/heads/main');
   put(root, 'obsidian-v2/.runtime/aos-setup.json', {vault, voice: true});
@@ -64,7 +64,7 @@ const isolated = home => ({home, env: {}, root: path.join(home, 'reference', 'ob
 
 test('an original-starter member can be found by vault name without knowing an OS path', async t => {
   const home = scratch(t), vault = path.join(home, 'Writing vault');
-  put(vault, '.obsidian/plugins/curiosity-command-center/manifest.json', {id: 'curiosity-command-center', name: 'Curiosity Command Center', version: '1.0.0'});
+  put(vault, '.obsidian/plugins/chase-command-center/manifest.json', {id: 'chase-command-center', name: 'Chase Command Center', version: '1.0.0'});
   put(vault, 'projects/my-custom-workflow.md', 'Keep this workflow exactly.');
   put(home, 'Library/Application Support/obsidian/obsidian.json', {vaults: {fixture: {path: vault, open: true}}});
   const before = snapshot(home);
@@ -89,7 +89,7 @@ test('a stock V2 is assessed without updating files or stopping anything', async
 
 for (const committed of [false, true]) test(`a ${committed ? 'committed' : 'working-tree'} customization is preserved and blocks direct update before service access`, async t => {
   const home = scratch(t), {root} = starter(home);
-  put(root, 'hugo-v2/my-dashboard.tsx', '// My own dashboard must survive.');
+  put(root, 'jarvis-v2/my-dashboard.tsx', '// My own dashboard must survive.');
   if (committed) { git(root, 'add', '.'); git(root, 'commit', '-q', '-m', 'member customization'); }
   const before = snapshot(home), report = await inspectUpgrade({...isolated(home), install: root});
   assert.equal(report.candidates[0].checkout.updateAllowed, false);
@@ -105,7 +105,7 @@ test('multiple vaults require a member choice and never select one by position',
   const home = scratch(t), vaults = {};
   for (const name of ['Work', 'Personal']) {
     const vault = path.join(home, name);
-    put(vault, '.obsidian/plugins/curiosity-command-center/manifest.json', {id: 'curiosity-command-center', version: '1.0.0'});
+    put(vault, '.obsidian/plugins/chase-command-center/manifest.json', {id: 'chase-command-center', version: '1.0.0'});
     vaults[name] = {path: vault};
   }
   put(home, 'Library/Application Support/obsidian/obsidian.json', {vaults});

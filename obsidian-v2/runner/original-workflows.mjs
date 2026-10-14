@@ -19,7 +19,7 @@ export function deliverablePathFor(intent) {
       return `inbox/reports/morning/${date}-morning-report-${id8}.md`;
     case "inbox-brief":
       return `inbox/reports/inbox-briefs/${date}-${id8}.md`;
-    case "deep-research-curiosity":
+    case "deep-research-chase":
       return `inbox/research/${date}-${slugify(args.topic)}.md`;
     case "content-cascade":
       return `inbox/reports/cascades/${date}-${id8}.md`;
@@ -75,7 +75,7 @@ export function originalPrompt(intent) {
       return 'Produce the complete current AI and agent-building morning report using the attached 24-hour source and output rubric.';
     case 'inbox-brief':
       return 'Read and triage the last 24 hours of the authenticated inbox using the attached categories, lead scoring, and report rubric. Return the triage and suggested actions; do not create drafts or send messages in this initial run.';
-    case 'deep-research-curiosity':
+    case 'deep-research-chase':
       return args.topic?.trim() ? `Research this topic across YouTube, web, X and GitHub using the attached research rubrics: ${JSON.stringify(args.topic)}. Return the full cited synthesis, selected sources, disagreements and content opportunities. Read existing NotebookLM sources or available transcripts; creating a remote notebook is a separate explicitly requested follow-up.` : null;
     case 'content-cascade':
       return args.url?.trim() ? `Obtain the actual transcript for ${JSON.stringify(args.url)} and produce the complete blog draft, X post and reply, LinkedIn post and first comment using the attached editorial rubric. Return all draft copy and metadata in one complete Markdown bundle. If all transcript methods fail, return BLOCKED: with the source failure. Publishing, scheduling and database mutations are outside this initial workflow.` : null;

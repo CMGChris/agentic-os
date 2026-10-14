@@ -28,41 +28,41 @@ const stubs={
  './bridge-auth':`export function authorizeBridge(){throw new Error('No authorization required')}`,
  '../../obsidian-v2/shared/timezone.mjs':`export const TIME_ZONE=new Intl.DateTimeFormat().resolvedOptions().timeZone;`,
 };
-const hugo=await load(await build({stdin:{contents:`export {voice} from '../hugo-v2/lib/voiceClient';export {sessions} from '../../obsidian-v2/shared/voice-session';export {workCalls} from './work';`,loader:'ts',resolveDir:process.cwd()},bundle:true,platform:'node',format:'esm',write:false,plugins:[{name:'voice-navigation-fixture',setup(builder){
- builder.onResolve({filter:/.*/},args=>{if(args.path==='../hugo-v2/lib/voiceClient')return {path:path.resolve('../hugo-v2/lib/voiceClient.ts')};if(args.path in stubs)return {path:args.path,namespace:'fixture'};throw new Error('Unexpected voice dependency '+args.path)});
+const jarvis=await load(await build({stdin:{contents:`export {voice} from '../jarvis-v2/lib/voiceClient';export {sessions} from '../../obsidian-v2/shared/voice-session';export {workCalls} from './work';`,loader:'ts',resolveDir:process.cwd()},bundle:true,platform:'node',format:'esm',write:false,plugins:[{name:'voice-navigation-fixture',setup(builder){
+ builder.onResolve({filter:/.*/},args=>{if(args.path==='../jarvis-v2/lib/voiceClient')return {path:path.resolve('../jarvis-v2/lib/voiceClient.ts')};if(args.path in stubs)return {path:args.path,namespace:'fixture'};throw new Error('Unexpected voice dependency '+args.path)});
  builder.onLoad({filter:/.*/,namespace:'fixture'},args=>({contents:stubs[args.path],loader:'js'}));
  }}]}));
 
-test('Hugo quick documents highlight does not open work, a report, or a reveal',()=>{
- const highlights=[];hugo.voice.onPanels(value=>highlights.push(value));hugo.voice.onOpenDoc(()=>assert.fail('no report opening'));hugo.voice.onDeliverable(()=>assert.fail('no report callout'));hugo.voice.onReveal(()=>assert.fail('no reveal'));
- hugo.voice.init();const before=hugo.workCalls.length;hugo.sessions.at(-1).onReply(quickReply);assert.deepEqual(highlights,[['documents']]);assert.equal(hugo.workCalls.length,before);hugo.voice.destroy();
+test('Jarvis quick documents highlight does not open work, a report, or a reveal',()=>{
+ const highlights=[];jarvis.voice.onPanels(value=>highlights.push(value));jarvis.voice.onOpenDoc(()=>assert.fail('no report opening'));jarvis.voice.onDeliverable(()=>assert.fail('no report callout'));jarvis.voice.onReveal(()=>assert.fail('no reveal'));
+ jarvis.voice.init();const before=jarvis.workCalls.length;jarvis.sessions.at(-1).onReply(quickReply);assert.deepEqual(highlights,[['documents']]);assert.equal(jarvis.workCalls.length,before);jarvis.voice.destroy();
 });
 
-test('explicit terminal command and actual work IDs still open Hugo work',()=>{
- hugo.voice.init();const session=hugo.sessions.at(-1),before=hugo.workCalls.length;
+test('explicit terminal command and actual work IDs still open Jarvis work',()=>{
+ jarvis.voice.init();const session=jarvis.sessions.at(-1),before=jarvis.workCalls.length;
  session.onReply({...quickReply,panels:[],workIds:['new-a','new-b'],action:'task'});
  session.onReply({...quickReply,panels:[],obsidian:{op:'command',id:'terminal:open-terminal.default.root',label:'terminal'}});
- assert.deepEqual(hugo.workCalls.slice(before),[{ids:['new-a','new-b'],spoken:true},{ids:[],spoken:false}]);hugo.voice.destroy();
+ assert.deepEqual(jarvis.workCalls.slice(before),[{ids:['new-a','new-b'],spoken:true},{ids:[],spoken:false}]);jarvis.voice.destroy();
 });
 
-test('explicit saved-report opens display the report in Hugo without a terminal or extra callout',()=>{
- const opened=[];hugo.voice.onPanels(()=>{});hugo.voice.onOpenDoc(path=>opened.push(path));hugo.voice.onDeliverable(()=>assert.fail('no extra report callout'));hugo.voice.onReveal(()=>assert.fail('no extra reveal'));
- hugo.voice.init();const session=hugo.sessions.at(-1),before=hugo.workCalls.length,path='inbox/research/morning-intel/2026-09-15-intel.md';
+test('explicit saved-report opens display the report in Jarvis without a terminal or extra callout',()=>{
+ const opened=[];jarvis.voice.onPanels(()=>{});jarvis.voice.onOpenDoc(path=>opened.push(path));jarvis.voice.onDeliverable(()=>assert.fail('no extra report callout'));jarvis.voice.onReveal(()=>assert.fail('no extra reveal'));
+ jarvis.voice.init();const session=jarvis.sessions.at(-1),before=jarvis.workCalls.length,path='inbox/research/morning-intel/2026-09-15-intel.md';
  for(const provider of ['codex','claude'])session.onReply({...quickReply,provider,reply:'',deliverable:path,reveal:'open'});
- assert.deepEqual(opened,[path,path]);assert.equal(hugo.workCalls.length,before);hugo.voice.destroy();
+ assert.deepEqual(opened,[path,path]);assert.equal(jarvis.workCalls.length,before);jarvis.voice.destroy();
 });
 
-test('Hugo reports provider changes only when an active voice turn was stopped',()=>{
- const logs=[];hugo.voice.onLog((kind,text)=>logs.push({kind,text}));hugo.voice.init();const session=hugo.sessions.at(-1);
+test('Jarvis reports provider changes only when an active voice turn was stopped',()=>{
+ const logs=[];jarvis.voice.onLog((kind,text)=>logs.push({kind,text}));jarvis.voice.init();const session=jarvis.sessions.at(-1);
  for(const state of ['listening','working','speaking']){
   session.mode=state;const before=logs.length;
-  assert.equal(hugo.voice.stop('provider-change'),'cancel-result');assert.equal(session.mode,'idle');
+  assert.equal(jarvis.voice.stop('provider-change'),'cancel-result');assert.equal(session.mode,'idle');
   assert.equal(logs.length,before+1);assert.equal(logs.at(-1).kind,'sys');assert.match(logs.at(-1).text,/stopped.*switching providers/i);
-  hugo.voice.stop('provider-change');assert.equal(logs.length,before+1,'idle rerenders stay quiet');
+  jarvis.voice.stop('provider-change');assert.equal(logs.length,before+1,'idle rerenders stay quiet');
  }
- session.mode='working';const before=logs.length;hugo.voice.stop();assert.equal(logs.length,before,'ordinary stops retain existing caller messaging');
- session.mode='error';hugo.voice.stop('provider-change');assert.equal(logs.length,before,'inactive errors do not claim a stopped recording');
- assert.deepEqual(session.cancellations,['provider-change','provider-change','provider-change','provider-change','provider-change','provider-change',undefined,'provider-change']);hugo.voice.destroy();
+ session.mode='working';const before=logs.length;jarvis.voice.stop();assert.equal(logs.length,before,'ordinary stops retain existing caller messaging');
+ session.mode='error';jarvis.voice.stop('provider-change');assert.equal(logs.length,before,'inactive errors do not claim a stopped recording');
+ assert.deepEqual(session.cancellations,['provider-change','provider-change','provider-change','provider-change','provider-change','provider-change',undefined,'provider-change']);jarvis.voice.destroy();
 });
 
 function nativeNoteFixture(file){

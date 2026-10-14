@@ -9,17 +9,17 @@ import {projectRoot} from '../../runner/runtime.mjs';
 import {listener, processInfo, samePath, tryJson, fetchJson, sleep} from './platform.mjs';
 import {autostartOwner, kickAutostart, refreshAutostartPolicy} from './autostart.mjs';
 
-export const PORTS = {hugo: 3217, preview: 3218, bridge: 3219, speech: 3220, supervisor: 3221};
+export const PORTS = {jarvis: 3217, preview: 3218, bridge: 3219, speech: 3220, supervisor: 3221};
 const local = port => `http://127.0.0.1:${port}`;
 const OPEN_STATES = new Set(['working', 'ready', 'editing', 'starting', 'needs input']);
 
 export function layout(root = projectRoot) {
-  const runtime = path.join(root, '.runtime'), hugo = path.resolve(root, '..', 'hugo-v2');
+  const runtime = path.join(root, '.runtime'), jarvis = path.resolve(root, '..', 'jarvis-v2');
   const venv = path.join(runtime, 'speech-venv');
-  return {root, runtime, hugo, config: path.join(runtime, 'service-recovery.json'), pause: path.join(runtime, 'services-paused.json'),
+  return {root, runtime, jarvis, config: path.join(runtime, 'service-recovery.json'), pause: path.join(runtime, 'services-paused.json'),
     recoveryState: path.join(runtime, 'service-recovery-state.json'), vaultFile: path.join(runtime, 'vault.json'), auth: path.join(runtime, 'bridge-auth.json'),
     supervisor: path.join(root, 'runner', 'service-supervisor.mjs'), bridge: path.join(root, 'runner', 'bridge.mjs'), preview: path.join(root, 'preview', 'server.mjs'),
-    next: path.join(hugo, 'node_modules', 'next', 'dist', 'bin', 'next'), buildId: path.join(hugo, '.next', 'BUILD_ID'),
+    next: path.join(jarvis, 'node_modules', 'next', 'dist', 'bin', 'next'), buildId: path.join(jarvis, '.next', 'BUILD_ID'),
     speechScript: path.join(root, 'runner', 'speech.py'), speechAssets: path.join(runtime, 'speech-assets'),
     speechPython: process.platform === 'win32' ? path.join(venv, 'Scripts', 'python.exe') : path.join(venv, 'bin', 'python'), venv};
 }
@@ -29,10 +29,10 @@ export const configuredVaultPath = at => fs.existsSync(at.vaultFile) ? readJson(
 export const speechInstalled = at => fs.existsSync(at.speechPython) && ['kokoro-v1.0.onnx', 'voices-v1.0.bin'].every(name => fs.existsSync(path.join(at.speechAssets, name)));
 
 // Pure: the list of services the monitor should keep alive.
-export function desiredServices(at, {node = process.execPath, speechUrl = null, vault = null, hugoBuilt = false, ownSpeech = false} = {}) {
+export function desiredServices(at, {node = process.execPath, speechUrl = null, vault = null, jarvisBuilt = false, ownSpeech = false} = {}) {
   const env = {...(speechUrl ? {AOS_V2_SPEECH_URL: speechUrl} : {}), ...(vault ? {AOS_V2_VAULT: vault} : {})};
   const services = [{id: 'bridge', port: PORTS.bridge, command: node, args: [at.bridge], cwd: at.root, env}];
-  if (hugoBuilt) services.push({id: 'hugo', port: PORTS.hugo, command: node, args: [at.next, 'start', '--hostname', '127.0.0.1', '--port', String(PORTS.hugo)], cwd: at.hugo});
+  if (jarvisBuilt) services.push({id: 'jarvis', port: PORTS.jarvis, command: node, args: [at.next, 'start', '--hostname', '127.0.0.1', '--port', String(PORTS.jarvis)], cwd: at.jarvis});
   if (ownSpeech) services.push({id: 'speech', port: PORTS.speech, command: at.speechPython, args: ['-u', at.speechScript, '--assets', at.speechAssets], cwd: at.root});
   return services;
 }
@@ -42,7 +42,7 @@ export function mergePrior(services, prior, runtimeDir) {
   if (!prior) return services;
   if (!samePath(prior.runtimeDir, runtimeDir)) throw new Error('Recovery configuration belongs to another installation.');
   const ids = new Set(services.map(service => service.id));
-  return [...services, ...(prior.services || []).filter(service => ['hugo', 'speech'].includes(service.id) && !ids.has(service.id))];
+  return [...services, ...(prior.services || []).filter(service => ['jarvis', 'speech'].includes(service.id) && !ids.has(service.id))];
 }
 
 async function healthySpeech(get = tryJson) {
@@ -101,7 +101,7 @@ export async function start({root = projectRoot, resetRecovery = false, log = co
   }
   if (resetRecovery) fs.rmSync(at.recoveryState, {force: true});
   const voice = await speechPlan(at);
-  let services = desiredServices(at, {speechUrl: voice.url, vault: configuredVaultPath(at), hugoBuilt: fs.existsSync(at.buildId), ownSpeech: voice.own});
+  let services = desiredServices(at, {speechUrl: voice.url, vault: configuredVaultPath(at), jarvisBuilt: fs.existsSync(at.buildId), ownSpeech: voice.own});
   if (supervisor && services.some(service => !supervisor.services.some(known => known.id === service.id))) {
     // Reconfigure the monitor alone when an existing installation adds a service.
     atomicWrite(at.pause, '{"reason":"recovery services changed"}');
@@ -179,8 +179,8 @@ export async function bridgeIsOurs(at, {post = fetchJson} = {}) {
   } catch { return false; }
 }
 export async function hudIsOurs(at, {get = tryJson, find = listener} = {}) {
-  const info = find(PORTS.hugo), service = await get(`${local(PORTS.hugo)}/api/service`, {timeoutMs: 5000});
-  return !!info && !info.ambiguous && service?.kind === 'hugo-v2' && service.pid === info.pid && samePath(service.root, at.hugo) ? info : null;
+  const info = find(PORTS.jarvis), service = await get(`${local(PORTS.jarvis)}/api/service`, {timeoutMs: 5000});
+  return !!info && !info.ambiguous && service?.kind === 'jarvis-v2' && service.pid === info.pid && samePath(service.root, at.jarvis) ? info : null;
 }
 export async function speechIsOurs(at, {get = tryJson, find = listener} = {}) {
   const info = find(PORTS.speech), service = (await get(`${local(PORTS.speech)}/health`, {timeoutMs: 5000}))?.service;
@@ -199,12 +199,12 @@ export async function stop({root = projectRoot, log = console.log, find = listen
   const work = await get(`${local(PORTS.bridge)}/work`);
   if (!work || (work.tasks || []).some(task => task.pid || OPEN_STATES.has(task.state))) throw new Error('Stop active tasks in Terminals first. No service was stopped.');
   const targets = [];
-  if (find(PORTS.hugo)) {
+  if (find(PORTS.jarvis)) {
     const hud = await hudIsOurs(at, {get, find});
     if (!hud) throw new Error('Unexpected process on 3217; nothing stopped.');
-    const web = await get(`${local(PORTS.hugo)}/api/state`, {timeoutMs: 5000});
-    if (!web || !samePath(web.vault_root, state.vault)) throw new Error('Hugo belongs to another vault; nothing stopped.');
-    targets.push({name: 'hugo', pid: hud.pid, startedAt: hud.startedAt});
+    const web = await get(`${local(PORTS.jarvis)}/api/state`, {timeoutMs: 5000});
+    if (!web || !samePath(web.vault_root, state.vault)) throw new Error('Jarvis belongs to another vault; nothing stopped.');
+    targets.push({name: 'jarvis', pid: hud.pid, startedAt: hud.startedAt});
   }
   // Speech may be shared with another installation: only our own is stopped, anything else is left running.
   const speech = find(PORTS.speech) ? await speechIsOurs(at, {get, find}) : null;

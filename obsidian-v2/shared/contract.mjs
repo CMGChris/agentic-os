@@ -28,7 +28,7 @@ export const SKILLS = {
     "label": "Inbox Brief",
     "instruction": "Complete the Inbox Brief workflow."
   },
-  "deep-research-curiosity": {
+  "deep-research-chase": {
     "label": "Deep Research",
     "instruction": "Complete the Deep Research workflow.",
     "arg": "topic"

@@ -2,7 +2,7 @@ import {ProviderUsage} from './ProviderUsage';
 import {openWork} from '../lib/work';
 import { h, Fragment } from "preact";
 import { useEffect, useState, useCallback, useRef } from "preact/hooks";
-import type CuriosityCommandCenter from "../main";
+import type ChaseCommandCenter from "../main";
 import {
 	readMetricsCsv,
 	invalidateMetrics,
@@ -47,7 +47,7 @@ import { GlassConsole } from "./GlassConsole";
 import type { CockpitTheme } from "../settings";
 
 interface Props {
-	plugin: CuriosityCommandCenter;
+	plugin: ChaseCommandCenter;
 }
 
 type Tab = "overview" | "audience" | "research";

@@ -46,7 +46,7 @@ test('a listener is identified per platform, and two listeners on one port are n
 
 function installation() {
   const root = scratch(), at = layout(root);
-  fs.mkdirSync(at.runtime, {recursive: true}); fs.mkdirSync(at.hugo, {recursive: true}); fs.mkdirSync(path.dirname(at.speechScript), {recursive: true});
+  fs.mkdirSync(at.runtime, {recursive: true}); fs.mkdirSync(at.jarvis, {recursive: true}); fs.mkdirSync(path.dirname(at.speechScript), {recursive: true});
   fs.writeFileSync(at.speechScript, ''); fs.writeFileSync(at.auth, JSON.stringify({token: TOKEN}));
   fs.writeFileSync(at.vaultFile, JSON.stringify({vault: path.join(root, 'vault')}));
   return at;
@@ -70,13 +70,13 @@ test('a service proves itself over its own port: the token for the bridge, a sel
 
   const listening = pid => () => ({pid, name: 'whatever', commandLine: 'anything at all', startedAt: 'T1'});
   const hud = service => async () => service;
-  assert.deepEqual(await hudIsOurs(at, {find: listening(7), get: hud({kind: 'hugo-v2', pid: 7, root: at.hugo})}), listening(7)());
-  assert.equal(await hudIsOurs(at, {find: listening(7), get: hud({kind: 'hugo-v2', pid: 8, root: at.hugo})}), null, 'it may only vouch for the process that is listening');
-  assert.equal(await hudIsOurs(at, {find: listening(7), get: hud({kind: 'hugo-v2', pid: 7, root: path.resolve('/another/checkout/hugo-v2')})}), null);
-  assert.equal(await hudIsOurs(at, {find: listening(7), get: hud({kind: 'something-else', pid: 7, root: at.hugo})}), null);
+  assert.deepEqual(await hudIsOurs(at, {find: listening(7), get: hud({kind: 'jarvis-v2', pid: 7, root: at.jarvis})}), listening(7)());
+  assert.equal(await hudIsOurs(at, {find: listening(7), get: hud({kind: 'jarvis-v2', pid: 8, root: at.jarvis})}), null, 'it may only vouch for the process that is listening');
+  assert.equal(await hudIsOurs(at, {find: listening(7), get: hud({kind: 'jarvis-v2', pid: 7, root: path.resolve('/another/checkout/jarvis-v2')})}), null);
+  assert.equal(await hudIsOurs(at, {find: listening(7), get: hud({kind: 'something-else', pid: 7, root: at.jarvis})}), null);
   assert.equal(await hudIsOurs(at, {find: listening(7), get: hud(null)}), null, 'a server that says nothing about itself is not ours');
-  assert.equal(await hudIsOurs(at, {find: () => ({ambiguous: true}), get: hud({kind: 'hugo-v2', pid: 7, root: at.hugo})}), null);
-  assert.equal(await hudIsOurs(at, {find: () => null, get: hud({kind: 'hugo-v2', pid: 7, root: at.hugo})}), null);
+  assert.equal(await hudIsOurs(at, {find: () => ({ambiguous: true}), get: hud({kind: 'jarvis-v2', pid: 7, root: at.jarvis})}), null);
+  assert.equal(await hudIsOurs(at, {find: () => null, get: hud({kind: 'jarvis-v2', pid: 7, root: at.jarvis})}), null);
 
   const health = service => async () => ({ok: true, service});
   assert.deepEqual(await speechIsOurs(at, {find: listening(9), get: health({kind: 'aos-v2-speech', pid: 9, script: at.speechScript})}), listening(9)());
@@ -87,21 +87,21 @@ test('a service proves itself over its own port: the token for the bridge, a sel
 test('the service list matches the PowerShell launcher, is accepted by the monitor, and keeps earlier optional services', () => {
   const at = layout(path.resolve('/x/aos/obsidian-v2'));
   const node = path.resolve('/usr/bin/node');
-  const base = desiredServices(at, {node, vault: '/v', speechUrl: 'http://127.0.0.1:3220', hugoBuilt: true, ownSpeech: true});
-  assert.deepEqual(base.map(service => [service.id, service.port]), [['bridge', 3219], ['hugo', 3217], ['speech', 3220]]);
+  const base = desiredServices(at, {node, vault: '/v', speechUrl: 'http://127.0.0.1:3220', jarvisBuilt: true, ownSpeech: true});
+  assert.deepEqual(base.map(service => [service.id, service.port]), [['bridge', 3219], ['jarvis', 3217], ['speech', 3220]]);
   assert.deepEqual(base[0].env, {AOS_V2_SPEECH_URL: 'http://127.0.0.1:3220', AOS_V2_VAULT: '/v'});
   assert.deepEqual(base[1].args.slice(1), ['start', '--hostname', '127.0.0.1', '--port', '3217']);
-  assert.equal(base[1].env, undefined, 'Hugo learns the vault from the bridge, exactly as today');
+  assert.equal(base[1].env, undefined, 'Jarvis learns the vault from the bridge, exactly as today');
   assert.deepEqual(base[2].args, ['-u', at.speechScript, '--assets', at.speechAssets]);
   assert.doesNotThrow(() => supervisorConfig({runtimeDir: at.runtime, lockPort: PORTS.supervisor, services: base}));
   assert.deepEqual(desiredServices(at, {node}).map(service => service.id), ['bridge']);
   const merged = mergePrior(desiredServices(at, {node}), {runtimeDir: at.runtime, services: [...base, {id: 'other', port: 1}, {id: 'preview', port: 3218}]}, at.runtime);
-  assert.deepEqual(merged.map(service => service.id), ['bridge', 'hugo', 'speech'], 'the development preview is not something this launcher starts, even from an older configuration');
+  assert.deepEqual(merged.map(service => service.id), ['bridge', 'jarvis', 'speech'], 'the development preview is not something this launcher starts, even from an older configuration');
   assert.throws(() => mergePrior([], {runtimeDir: path.resolve('/elsewhere/.runtime'), services: []}, at.runtime), /another installation/);
 });
 
-function stopWith(at, {state = {vault: path.join(at.root, 'vault')}, work = {tasks: []}, hudService = {kind: 'hugo-v2', pid: 2, root: at.hugo}, hudVault = path.join(at.root, 'vault'),
-  speechService, listeners = {[PORTS.hugo]: 2}, post = bridgeLike(TOKEN), inspect} = {}) {
+function stopWith(at, {state = {vault: path.join(at.root, 'vault')}, work = {tasks: []}, hudService = {kind: 'jarvis-v2', pid: 2, root: at.jarvis}, hudVault = path.join(at.root, 'vault'),
+  speechService, listeners = {[PORTS.jarvis]: 2}, post = bridgeLike(TOKEN), inspect} = {}) {
   const killed = [], posted = [];
   const info = pid => ({pid, name: 'x', commandLine: 'x', startedAt: 'T1'});
   const run = stop({root: at.root, log: () => {}, kill: pid => killed.push(pid), find: port => listeners[port] === 'ambiguous' ? {ambiguous: true} : listeners[port] ? info(listeners[port]) : null,
@@ -120,9 +120,9 @@ test('stop fails closed: nothing is stopped unless the bridge, the vault, the ta
     [() => ({work: {tasks: [{state: 'stopped', pid: 77}]}}), /Stop active tasks/],
     [() => ({work: null}), /Stop active tasks/],
     [() => ({hudService: null}), /Unexpected process on 3217/],
-    [at => ({hudService: {kind: 'hugo-v2', pid: 99, root: at.hugo}}), /Unexpected process on 3217/],
-    [() => ({listeners: {[PORTS.hugo]: 'ambiguous'}}), /Unexpected process on 3217/],
-    [() => ({hudVault: '/someone/else'}), /Hugo belongs to another vault/],
+    [at => ({hudService: {kind: 'jarvis-v2', pid: 99, root: at.jarvis}}), /Unexpected process on 3217/],
+    [() => ({listeners: {[PORTS.jarvis]: 'ambiguous'}}), /Unexpected process on 3217/],
+    [() => ({hudVault: '/someone/else'}), /Jarvis belongs to another vault/],
   ];
   for (const [options, message] of cases) {
     const at = installation(), attempt = stopWith(at, options(at));
@@ -137,11 +137,11 @@ test('stop fails closed: nothing is stopped unless the bridge, the vault, the ta
 
 test('stop shuts the bridge down through its own endpoint, stops only proven processes, and leaves borrowed speech alone', async () => {
   const at = installation();
-  const borrowed = stopWith(at, {listeners: {[PORTS.hugo]: 2, [PORTS.speech]: 3}, speechService: {kind: 'aos-v2-speech', pid: 3, script: path.resolve('/another/install/runner/speech.py')}});
-  assert.deepEqual((await borrowed.run).stopped, ['bridge', 'hugo']);
+  const borrowed = stopWith(at, {listeners: {[PORTS.jarvis]: 2, [PORTS.speech]: 3}, speechService: {kind: 'aos-v2-speech', pid: 3, script: path.resolve('/another/install/runner/speech.py')}});
+  assert.deepEqual((await borrowed.run).stopped, ['bridge', 'jarvis']);
   assert.deepEqual(borrowed.killed, [2]); assert.deepEqual(borrowed.posted, [TOKEN]);
-  const own = stopWith(at, {listeners: {[PORTS.hugo]: 2, [PORTS.speech]: 3}, speechService: {kind: 'aos-v2-speech', pid: 3, script: at.speechScript}});
-  assert.deepEqual((await own.run).stopped, ['bridge', 'hugo', 'speech']); assert.deepEqual(own.killed, [2, 3]);
+  const own = stopWith(at, {listeners: {[PORTS.jarvis]: 2, [PORTS.speech]: 3}, speechService: {kind: 'aos-v2-speech', pid: 3, script: at.speechScript}});
+  assert.deepEqual((await own.run).stopped, ['bridge', 'jarvis', 'speech']); assert.deepEqual(own.killed, [2, 3]);
   const noHud = stopWith(at, {listeners: {}});
   assert.deepEqual((await noHud.run).stopped, ['bridge']); assert.deepEqual(noHud.killed, []);
   const recycled = stopWith(at, {inspect: pid => ({pid, name: 'x', commandLine: 'x', startedAt: 'T2'})});
@@ -157,8 +157,8 @@ test('setup changes nothing when another installation owns the ports or the vaul
   const ourMonitor = {kind: 'agentic-os-service-supervisor', runtimeDir: at.runtime};
   const withMonitor = extra => async url => url.endsWith(':3221/status') ? ourMonitor : extra?.(url) ?? null;
   await assert.rejects(preflight(at, vault, {get: withMonitor(), find: port => port === PORTS.bridge ? {pid: 9} : null, post: bridgeLike('d'.repeat(64))}), /using port 3219/, 'our monitor running excuses nobody');
-  await assert.rejects(preflight(at, vault, {get: withMonitor(), find: port => port === PORTS.hugo ? {pid: 9} : null, post: bridgeLike(TOKEN)}), /using port 3217/);
-  await assert.doesNotReject(preflight(at, vault, {get: withMonitor(url => url.endsWith('/api/service') ? {kind: 'hugo-v2', pid: 9, root: at.hugo} : null), find: port => [PORTS.bridge, PORTS.hugo].includes(port) ? {pid: 9} : null, post: bridgeLike(TOKEN)}));
+  await assert.rejects(preflight(at, vault, {get: withMonitor(), find: port => port === PORTS.jarvis ? {pid: 9} : null, post: bridgeLike(TOKEN)}), /using port 3217/);
+  await assert.doesNotReject(preflight(at, vault, {get: withMonitor(url => url.endsWith('/api/service') ? {kind: 'jarvis-v2', pid: 9, root: at.jarvis} : null), find: port => [PORTS.bridge, PORTS.jarvis].includes(port) ? {pid: 9} : null, post: bridgeLike(TOKEN)}));
   await assert.doesNotReject(preflight(at, vault, nothing));
   const marker = path.join(vault, '.obsidian', 'plugins', 'agentic-os-v2');
   fs.mkdirSync(marker, {recursive: true});

@@ -19,7 +19,7 @@ const vault=t=>{
  return root;
 };
 const settle=async()=>{for(let i=0;i<1000&&classifierProcesses().total;i++)await tick(5);assert.equal(classifierProcesses().total,0)};
-const exchange=(fields={})=>({ts:new Date().toISOString(),you:'Close this tab please',hugo:'',tier:1,rule:'rules.obsidianControl',...fields});
+const exchange=(fields={})=>({ts:new Date().toISOString(),you:'Close this tab please',jarvis:'',tier:1,rule:'rules.obsidianControl',...fields});
 
 test('the switch fails closed and is never read from disk under the test runner',()=>{
  assert.deepEqual(readStrictConfig(),{open:'off',ui:'off'});
@@ -48,7 +48,7 @@ test('an earlier exchange is a plain command only with recorded proof or a sente
  assert.equal(plainCommand(exchange({you:'Pop open the streak plan',rule:STRICT_RULE.open}),tables),true);
  assert.equal(plainCommand(exchange({you:'anything at all',rule:STRICT_RULE.ui}),tables),true);
  // No proof, but the closed grammar accepts every word.
- assert.equal(plainCommand(exchange({you:'Hey Hugo, toggle the left sidebar please',rule:'rules.obsidianControl'}),tables),true);
+ assert.equal(plainCommand(exchange({you:'Hey Jarvis, toggle the left sidebar please',rule:'rules.obsidianControl'}),tables),true);
  assert.equal(plainCommand(exchange({you:'Open Gmail',rule:null}),tables),true);
  // Written by a model, or work was dispatched: a conversation, whatever the sentence looks like.
  assert.equal(plainCommand(exchange({tier:2}),tables),false);assert.equal(plainCommand(exchange({tier:3,rule:STRICT_RULE.ui}),tables),false);

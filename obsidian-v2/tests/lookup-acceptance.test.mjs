@@ -168,7 +168,7 @@ for(const provider of ['codex','claude']){
  test(`${provider}: recent-report discovery returns recorded safe outputs without reading report bodies or unrelated vault data`,async t=>{
   const f=fixture(t),relative='inbox/research/fixture-review.md';
   f.write(relative,'REPORT_BODY_SENTINEL');
-  f.write('system/v2/runs/report-1.json',JSON.stringify({status:'ok',skill:'deep-research-curiosity',label:'Saved compiler review',summary:'Measured local compiler behavior.',ts_completed:new Date().toISOString(),deliverable_path:relative}));
+  f.write('system/v2/runs/report-1.json',JSON.stringify({status:'ok',skill:'deep-research-chase',label:'Saved compiler review',summary:'Measured local compiler behavior.',ts_completed:new Date().toISOString(),deliverable_path:relative}));
   f.write('system/v2/runs/bad-path.json',JSON.stringify({status:'ok',label:'OUTSIDE_PATH_SENTINEL',deliverable_path:'../outside.md'}));
   const {value,reads}=await traceReads(f.root,()=>f.speak(provider,'Which reports have finished recently?'));
   assert.match(value.reply,/Saved compiler review/);assert.doesNotMatch(value.reply,/OUTSIDE_PATH_SENTINEL|REPORT_BODY_SENTINEL/);assert.equal(value.model,null);assert.deepEqual(value.workIds,[]);

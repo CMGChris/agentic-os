@@ -1,7 +1,7 @@
 import { h } from 'preact';
 import { useState } from 'preact/hooks';
 import { Notice } from 'obsidian';
-import type CuriosityCommandCenter from '../main';
+import type ChaseCommandCenter from '../main';
 import { useProvider } from '../lib/provider';
 import { useDashboard, dashboardButtons, dashboardSkillReason, launchDashboardSkill, type DashboardSkill } from '../lib/dashboard';
 import { askForArg } from './IntentArgModal';
@@ -9,7 +9,7 @@ import { openWorkflowPicker } from './WorkflowModal';
 import { openDashboardCustomization } from './DashboardModal';
 
 interface Props {
- plugin: CuriosityCommandCenter;
+ plugin: ChaseCommandCenter;
  onSubmitted?: () => void;
  appearance?: 'terminal' | 'glass';
 }

@@ -32,7 +32,7 @@ test('a display lead is either the assistant showing it or the user looking at i
  for(const [say,expected] of [
   ['Pop open the streak plan','the streak plan'],['I wanna see the streak plan','the streak plan'],['Can I see the streak plan?','the streak plan'],
   ['Could we please take a quick look at the streak plan?','the streak plan'],['Let me look at the streak plan real quick','the streak plan'],["I'd like to view the streak plan",'the streak plan'],
-  ['Hey Hugo, can you pull up the research note on Kevin Ngo for me?','the research note on kevin ngo'],['Open the draft script in Obsidian','the draft script'],
+  ['Hey Jarvis, can you pull up the research note on Kevin Ngo for me?','the research note on kevin ngo'],['Open the draft script in Obsidian','the draft script'],
   ['Pull the content backfill plan up for me please','the content backfill plan'],['Bring the draft script back up','the draft script'],['Take me to the streak plan','the streak plan'],
   ['Show me the latest github trending list on screen','the latest github trending list']])assert.equal(target(say),expected,say);
  for(const [say,reason] of [

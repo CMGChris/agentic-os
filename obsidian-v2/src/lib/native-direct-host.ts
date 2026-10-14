@@ -146,7 +146,7 @@ export class NativeDirectHost {
    try{this.verified()}catch(error){
     // The poll that calls sync() stays quiet on errors, so a refused Terminal
     // would otherwise leave a requested conversation silently unopened. Only a
-    // waiting launch earns the notice: a member who uses Hugo is not nagged.
+    // waiting launch earns the notice: a member who uses Jarvis is not nagged.
     // Read-only: nothing is claimed, reported or opened.
     const waiting=await this.options.request('/native/pending').catch(()=>null);
     if(Array.isArray(waiting?.actions)&&waiting.actions.some((action:{type?:string}|null)=>action?.type==='launch'))this.noticeOnce(message(error));

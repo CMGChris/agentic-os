@@ -36,7 +36,7 @@ When you are ready to end that conversation, close its terminal tab in the HUD o
 aos.mjs           Top-level launcher
 setup/            Instructions for the installing or upgrading agent
 obsidian-v2/      Bridge, Obsidian plugin, workflows, speech and vault template
-hugo-v2/        Browser HUD
+jarvis-v2/        Browser HUD
 docs/             User guides and troubleshooting
 ```
 

@@ -4,7 +4,7 @@ When setup installs this system's own voice service, it also enables **Controlâ€
 
 Press the shortcut once, wait for the listening cue, and speak. About 1.6 seconds of silence ends recording and sends your request to the provider selected in the cockpit. There is no need to hold the keys or press them again. Recording also ends after 60 seconds, or after about 5 seconds if no speech is heard.
 
-Keep Obsidian running with the Agentic OS orb enabled; its window can be behind another app. Alternatively, keep the Hugo HUD visible and click it once to allow browser audio playback. A hidden HUD alone or closed cockpit cannot receive the request. A shared speech service belongs to its own application and keeps that application's shortcut behavior.
+Keep Obsidian running with the Agentic OS orb enabled; its window can be behind another app. Alternatively, keep the Jarvis HUD visible and click it once to allow browser audio playback. A hidden HUD alone or closed cockpit cannot receive the request. A shared speech service belongs to its own application and keeps that application's shortcut behavior.
 
 ## Finish setup with a real microphone test
 

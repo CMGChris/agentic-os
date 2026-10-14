@@ -19,7 +19,7 @@ function fixture(t) {
     return {installPath: at, bridge, runtime: path.join(bridge, '.runtime')};
   };
   const vault = (at, {kind = 'v2', runtime} = {}) => {
-    const id = kind === 'v1' ? 'curiosity-command-center' : 'agentic-os-v2';
+    const id = kind === 'v1' ? 'chase-command-center' : 'agentic-os-v2';
     json(path.join(at, '.obsidian', 'plugins', id, 'manifest.json'), {id, name: 'UNTRUSTED_LABEL_CANARY'});
     if (runtime) json(path.join(at, '.obsidian', 'plugins', id, 'terminal-runtime.json'), {version: 1, vault: at, runtimeDir: runtime, ignoredSecret: 'SECRET_CANARY'});
     return at;

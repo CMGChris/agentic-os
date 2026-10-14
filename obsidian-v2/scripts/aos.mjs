@@ -15,7 +15,7 @@ const HELP = `Agentic OS V2
   setup --vault "<path>" [--provider claude|codex] [--voice yes|no] [--autostart yes|no] [--rebuild]
                       install or repair everything, then run the checks
                       (--provider: the coding tool buttons and voice use; default = the one installed)
-  start               start the local services (bridge, Hugo HUD, voice)
+  start               start the local services (bridge, Jarvis HUD, voice)
   stop                stop them (refuses while a task is open)
   status              what is running
   doctor [--full]     PASS / FAIL checks; --full also runs one real workflow

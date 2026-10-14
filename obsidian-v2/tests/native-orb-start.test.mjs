@@ -11,7 +11,7 @@ const stubs={
  'preact/hooks':`let layout=[],passive=[],cleanups=[];const run=queue=>{for(const effect of queue.splice(0)){const dispose=effect();if(dispose)cleanups.push(dispose)}};export const useEffect=effect=>passive.push(effect),useLayoutEffect=effect=>layout.push(effect);export const useState=initial=>[typeof initial==='function'?initial():initial,()=>{}],useRef=current=>({current}),useMemo=fn=>fn();export const flushLayout=()=>run(layout),flushPassive=()=>run(passive);export function cleanup(){passive=[];layout=[];for(const dispose of cleanups.splice(0).reverse())dispose()}`,
  'work-view':`export const WORK_VIEW='fixture-work';export class WorkView{}`,
  view:`export const COCKPIT_VIEW_TYPE='fixture-cockpit';export class CockpitView{}`,
- settings:`export const DEFAULT_SETTINGS={};export class CuriositySettingTab{}`,
+ settings:`export const DEFAULT_SETTINGS={};export class ChaseSettingTab{}`,
  'lib/provider':`export async function assertTestVault(){}export async function readSelection(){return {provider:'codex',model:'fixture'}}export const useProvider=()=>({selection:{provider:'codex',model:'fixture'}})`,
  'lib/work':`export const workTarget=()=>null,chooseWork=()=>{},setWorkProvider=()=>{},openWork=()=>{},workRequest=()=>{},isLiveTerminal=()=>false;export const workFeed={getSnapshot:()=>({tasks:[]}),subscribe:()=>()=>{},refresh:async()=>({tasks:[]})},workConversations={getSelection:async chosen=>chosen,sync:()=>{}}`,
  'lib/v2-voice':`export function configureVoiceTransport(){}export async function assertVoiceVault(){}export const v2VoiceTransport=()=>{throw new Error('No network allowed')}`,

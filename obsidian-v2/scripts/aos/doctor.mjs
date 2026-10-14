@@ -11,7 +11,7 @@ import {tryJson, probeJson, fetchJson, request, run, sleep} from './platform.mjs
 import {layout, PORTS, configuredVaultPath, speechInstalled} from './services.mjs';
 import {pluginInstalled, pluginEnabled} from './vault.mjs';
 import {hasJevKey} from './jev-key.mjs';
-import {terminalSupport, VERIFIED_TERMINAL_VERSIONS, HUGO_URL} from '../../shared/terminal-support.mjs';
+import {terminalSupport, VERIFIED_TERMINAL_VERSIONS, JARVIS_URL} from '../../shared/terminal-support.mjs';
 import {recordedTerminalPython} from '../../runner/terminal-python-record.mjs';
 import {terminalPythonWorks} from './terminal-python.mjs';
 
@@ -27,7 +27,7 @@ const TERMINAL_PYTHON_CHECK = 'Python helper for conversations inside Obsidian';
 // Only matters once the Terminal plugin is in use; the record exists only after setup verified it.
 export function terminalPythonCheck(runtime, {terminal, recorded = recordedTerminalPython, works = python => terminalPythonWorks(python)} = {}) {
   if (terminal.status !== 'PASS' && terminal.status !== 'FAIL') return {status: 'SKIP', detail: 'not needed until the Terminal plugin is installed and switched on'};
-  const fix = `Run \`node aos.mjs setup\` again (it needs Python 3.12: Windows \`winget install Python.Python.3.12\`, Mac \`xcode-select --install\`), or use the same buttons in Hugo at ${HUGO_URL}.`;
+  const fix = `Run \`node aos.mjs setup\` again (it needs Python 3.12: Windows \`winget install Python.Python.3.12\`, Mac \`xcode-select --install\`), or use the same buttons in Jarvis at ${JARVIS_URL}.`;
   const python = recorded(runtime);
   if (!python) return {status: 'FAIL', detail: 'not prepared', fix};
   // The record alone proves nothing today: the base Python may be gone or a module broken since.
@@ -35,12 +35,12 @@ export function terminalPythonCheck(runtime, {terminal, recorded = recordedTermi
 }
 
 // The optional Terminal community plugin, from the vault's own files. Never throws: whatever
-// is wrong here, Hugo still runs every conversation, so it can never be a core failure.
+// is wrong here, Jarvis still runs every conversation, so it can never be a core failure.
 export function terminalPluginCheck(vault) {
-  const reinstall = `Reinstall "Terminal" by polyipseity from Settings > Community plugins, or use the same buttons in Hugo at ${HUGO_URL}.`;
+  const reinstall = `Reinstall "Terminal" by polyipseity from Settings > Community plugins, or use the same buttons in Jarvis at ${JARVIS_URL}.`;
   if (!vault || !fs.existsSync(vault)) return {status: 'SKIP', detail: 'no vault configured'};
   const manifestFile = path.join(vault, '.obsidian', 'plugins', 'terminal', 'manifest.json');
-  if (!fs.existsSync(manifestFile)) return {status: 'SKIP', detail: 'not installed (optional: conversations and personal-skill buttons run in Hugo; to have them inside Obsidian, install "Terminal" by polyipseity from Settings > Community plugins)'};
+  if (!fs.existsSync(manifestFile)) return {status: 'SKIP', detail: 'not installed (optional: conversations and personal-skill buttons run in Jarvis; to have them inside Obsidian, install "Terminal" by polyipseity from Settings > Community plugins)'};
   let manifest;
   try { manifest = JSON.parse(fs.readFileSync(manifestFile, 'utf8')); } catch { return {status: 'FAIL', detail: 'its manifest.json could not be read', fix: reinstall}; }
   if (manifest?.id !== 'terminal') return {status: 'SKIP', detail: 'a different plugin occupies the .obsidian/plugins/terminal folder'};
@@ -138,7 +138,7 @@ export async function doctor({root = projectRoot, ci = false, full = false, phas
   // Asked first, printed in their usual place: the plugin line below needs the bridge's answer.
   let supervisor = await tryJson(`${local(ports.supervisor)}/status`);
   const services = await tryJson(`${local(ports.bridge)}/services`, {timeoutMs: 6000});
-  const hud = await tryJson(`${local(ports.hugo)}/api/state`, {timeoutMs: 15000});
+  const hud = await tryJson(`${local(ports.jarvis)}/api/state`, {timeoutMs: 15000});
 
   const vault = configuredVaultPath(at);
   await group(['Vault configured', 'Vault has the daily-note schema', 'Obsidian plugin files installed', 'Plugin switched on in Obsidian'], async () => {
@@ -165,7 +165,7 @@ export async function doctor({root = projectRoot, ci = false, full = false, phas
 
   add(supervisor ? 'PASS' : 'FAIL', 'Recovery monitor running', supervisor ? `${supervisor.services.length} services watched` : '', 'Run `node aos.mjs start`.');
   add(services?.bridge?.online ? 'PASS' : 'FAIL', `Bridge answering on ${ports.bridge}`, '', `Run \`node aos.mjs start\`, wait 20 seconds, then look at ${SUPERVISOR_LOG}.`);
-  add(hud ? 'PASS' : 'FAIL', `Hugo HUD answering on ${ports.hugo}`, '', 'Run `node aos.mjs setup` again to build the HUD, then `node aos.mjs start`.');
+  add(hud ? 'PASS' : 'FAIL', `Jarvis HUD answering on ${ports.jarvis}`, '', 'Run `node aos.mjs setup` again to build the HUD, then `node aos.mjs start`.');
   const bridgeDown = 'the bridge is not answering (see the FAIL above)';
 
   const signedIn = [], installed = [];
@@ -268,7 +268,7 @@ export async function doctor({root = projectRoot, ci = false, full = false, phas
       const task = (await tryJson(`${local(ports.bridge)}/work`, {timeoutMs: 8000}))?.tasks?.find(item => item.id === id);
       const destination = task?.workflow?.destination;
       if (task?.state === 'stopped' && !task.error && destination && fs.existsSync(path.join(vault, destination))) { add('PASS', WORKFLOW, destination); return; }
-      if (task && (task.state === 'error' || task.state === 'needs input' || (task.state === 'stopped' && task.error))) { add('FAIL', WORKFLOW, String(task.error || task.state).slice(0, 200), `Open the HUD at ${local(ports.hugo)}, look at the failed task in History, and show its message to your coding agent.`); return; }
+      if (task && (task.state === 'error' || task.state === 'needs input' || (task.state === 'stopped' && task.error))) { add('FAIL', WORKFLOW, String(task.error || task.state).slice(0, 200), `Open the HUD at ${local(ports.jarvis)}, look at the failed task in History, and show its message to your coding agent.`); return; }
     }
     add('FAIL', WORKFLOW, 'no result after 5 minutes', 'Open the HUD, check the task under Terminals, and show what it says to your coding agent.');
   });

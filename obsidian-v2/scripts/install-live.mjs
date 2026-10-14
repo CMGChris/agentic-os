@@ -7,7 +7,7 @@ if(!fs.existsSync(vaultPath(root,'system/schemas/daily-note.md'))||!fs.existsSyn
 const dist=path.join(projectRoot,'dist/agentic-os-v2'),manifest=JSON.parse(fs.readFileSync(path.join(dist,'manifest.json'),'utf8'));
 if(manifest.id!=='agentic-os-v2')throw new Error('Refusing to install over the V1 plugin ID');
 const stamp=new Date().toISOString().replace(/[:.]/g,'-'),backup=path.join(projectRoot,'.runtime/backups',stamp);fs.mkdirSync(backup,{recursive:true});
-const tracked=['.obsidian/community-plugins.json','.obsidian/plugins/curiosity-command-center/main.js','.obsidian/plugins/curiosity-command-center/manifest.json','.obsidian/plugins/curiosity-command-center/data.json','.agentic-os-v2.json'];
+const tracked=['.obsidian/community-plugins.json','.obsidian/plugins/chase-command-center/main.js','.obsidian/plugins/chase-command-center/manifest.json','.obsidian/plugins/chase-command-center/data.json','.agentic-os-v2.json'];
 const hashes={};
 for(const relative of tracked){const file=vaultPath(root,relative);if(fs.existsSync(file)){const target=path.join(backup,relative);fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(file,target);hashes[relative]=crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex')}}
 const target=vaultPath(root,'.obsidian/plugins/agentic-os-v2');

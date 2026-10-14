@@ -44,7 +44,7 @@ export function jevState({transcript,separateTasks=false,newConversation=false,a
  const state={transcript:whole.slice(0,1500),
   flags:{separate_tasks:!!separateTasks,new_conversation:!!newConversation,accepted_offer:!!accepted,transcript_truncated:false},
   selected_task:target?{title:clip(target.title,120),state:clip(target.state,24),last_result:clip(target.turns?.at(-1)?.text||target.lastAnswer,300)}:null,
-  recent_exchanges:exchanges.slice(-2).map(e=>({user:clip(e.you,300),assistant:clip(e.hugo,300),...(e.pendingSkill?{awaiting_arguments_for:clip(e.pendingSkill,60)}:{}),...(e.lookupRoute?{handled_by:clip(e.lookupRoute,30)}:{})})),
+  recent_exchanges:exchanges.slice(-2).map(e=>({user:clip(e.you,300),assistant:clip(e.jarvis,300),...(e.pendingSkill?{awaiting_arguments_for:clip(e.pendingSkill,60)}:{}),...(e.lookupRoute?{handled_by:clip(e.lookupRoute,30)}:{})})),
   saved_reports:reports.slice(0,24).map(name=>clip(name,60))};
  const size=()=>Buffer.byteLength(JSON.stringify(state));
  while(size()>4096&&state.recent_exchanges.length)state.recent_exchanges.shift();

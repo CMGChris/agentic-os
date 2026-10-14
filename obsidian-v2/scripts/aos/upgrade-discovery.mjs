@@ -4,7 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 
 const MAX_BYTES = 64 * 1024, MAX_PATHS = 32, MAX_READS = 256;
-const V2 = 'agentic-os-v2', V1 = 'curiosity-command-center';
+const V2 = 'agentic-os-v2', V1 = 'chase-command-center';
 const object = value => value !== null && typeof value === 'object' && !Array.isArray(value);
 const unique = values => [...new Set(values)];
 const labels = {'starter-v2': 'Agentic OS V2 starter', v2: 'Agentic OS V2', v1: 'First Agentic OS starter', unknown: 'Unconfirmed installation'};

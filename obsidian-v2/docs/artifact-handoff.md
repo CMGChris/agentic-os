@@ -18,7 +18,7 @@ The bridge accepts only registered IDs at `GET /artifacts/file`. The response co
 
 `X-V2-Surface` binds voice work to its actual native/web surface. A separate durable queue serves `/artifacts/claim` and `/artifacts/ack`. An automatic reveal requires the original surface, active provider, current conversation and context epoch. The client must be visible, focused and idle. A new conversation, provider change, voice activation, hidden window or unload cancels an unfinished open.
 
-Native Obsidian waits briefly for its file index, reveals an existing tab for that exact file if available, or otherwise opens one file tab and awaits the workspace operation. Hugo opens a compact viewer and awaits image loading, PDF viewer navigation or committed text. PDF navigation does not prove every page rendered. Physical native rendering still requires a manual check.
+Native Obsidian waits briefly for its file index, reveals an existing tab for that exact file if available, or otherwise opens one file tab and awaits the workspace operation. Jarvis opens a compact viewer and awaits image loading, PDF viewer navigation or committed text. PDF navigation does not prove every page rendered. Physical native rendering still requires a manual check.
 
 Claims are persisted before delivery. While a client remains alive, a lost acknowledgment retries only that acknowledgment. A claimed result has a 60-second confirmation lease; when it expires, a five-second bridge sweep records failure and durably queues failed-display speech, even if the client never polls again. Late acknowledgments cannot convert that failure into success, and reloads never automatically reopen a previously claimed result. Pending, unclaimed reveals expire after five minutes. Saved file references remain available. A failed lease means display was not confirmed, not proof that the viewer never showed the file. Stable outcome identities prevent duplicate speech queue entries across restart. Opening confirmation has its own audio kind so ordinary task grouping cannot erase it. Worker qualifications remain in the spoken outcome.
 
@@ -28,11 +28,11 @@ Every completion passes through the presentation guard, including completions wi
 
 Only small references live in task history and bounded delivery receipts. Image bytes stay on disk and are read on demand. Saved generated files are retained when display receipts expire; history expiration does not silently delete user-created output. Repeated presentation reuses the existing content copy. A later follow-up requests a fresh display through the helper.
 
-The implementation supports both Claude and Codex, and native Obsidian and Hugo. Native microphone, focus and renderer behavior are checked manually rather than by automated computer use.
+The implementation supports both Claude and Codex, and native Obsidian and Jarvis. Native microphone, focus and renderer behavior are checked manually rather than by automated computer use.
 
 ## Manual acceptance after activation
 
-1. Confirm the loaded Obsidian V2 version matches the current release in the [README](../README.md); use `/services` native presence or the loaded plugin manifest, not only files on disk. Refresh Hugo after activation.
+1. Confirm the loaded Obsidian V2 version matches the current release in the [README](../README.md); use `/services` native presence or the loaded plugin manifest, not only files on disk. Refresh Jarvis after activation.
 2. Ask for an image and have it displayed. Verify the image actually appears and the spoken outcome does not claim opening before that happens.
 3. Ask to show the same result again using an ordinary follow-up. Verify the existing tab is revealed without regenerating it or opening another copy. A task that revises one image should display only its finished version; an explicit request for two finished images should display both.
 4. Repeat with the other provider and surface. Reload once and switch providers while work is pending; old results must not steal focus in the new conversation.

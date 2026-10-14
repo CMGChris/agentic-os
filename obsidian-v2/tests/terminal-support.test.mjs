@@ -14,8 +14,8 @@ test('verified, untested, unsupported and missing versions are told apart', () =
     for (const version of versions) assert.equal(terminalSupport(version).status, status, `${JSON.stringify(version)} should be ${status}`);
 });
 
-test('every message that stops or warns names the Hugo fallback, and verified says nothing', () => {
-  for (const version of ['3.28.0', '3.28.0-beta.1', '3.27.0', '4.0.0', 'abc', null]) assert.match(terminalSupport(version).message, /Hugo at http:\/\/127\.0\.0\.1:3217/);
+test('every message that stops or warns names the Jarvis fallback, and verified says nothing', () => {
+  for (const version of ['3.28.0', '3.28.0-beta.1', '3.27.0', '4.0.0', 'abc', null]) assert.match(terminalSupport(version).message, /Jarvis at http:\/\/127\.0\.0\.1:3217/);
   assert.equal(terminalSupport('3.27.2').message, '');
   assert.match(terminalSupport('3.27.0').message, /too old/);
   assert.match(terminalSupport('3.28.0-beta.1').message, /Pre-release/);

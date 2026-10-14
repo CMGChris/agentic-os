@@ -32,7 +32,7 @@ Never paste `jev.json` or `bridge-auth.json` anywhere: they hold your OpenRouter
 
 **"Port 3221 belongs to another installation."** A second copy of this system is running from another folder, and only one copy can run at a time. The message names the folder (`It runs from "..."`); you can also open http://127.0.0.1:3221/status, where `runtimeDir` is that copy's `obsidian-v2/.runtime` folder. Run `node aos.mjs stop` in that copy's folder.
 
-**The doctor says voice is a "shared service".** Another program on this computer already runs a compatible speech service (for example an earlier Hugo install on port 3108), so this installation uses it instead of starting a second copy of the same models. Setup downloads nothing for voice in that case. If that other program goes away, run `node aos.mjs stop`, then `node aos.mjs setup --voice yes`: with nothing to share, this installation gets a voice of its own.
+**The doctor says voice is a "shared service".** Another program on this computer already runs a compatible speech service (for example an earlier Jarvis install on port 3108), so this installation uses it instead of starting a second copy of the same models. Setup downloads nothing for voice in that case. If that other program goes away, run `node aos.mjs stop`, then `node aos.mjs setup --voice yes`: with nothing to share, this installation gets a voice of its own.
 
 **Voice: the microphone does nothing.** Check the browser's site permission for `127.0.0.1:3217`. Mac: *System Settings → Privacy & Security → Microphone* must list your browser and Obsidian. The first request after a start can take a minute while the speech models load.
 

@@ -9,4 +9,4 @@ Part of the Agentic OS V2 starter. Install and run everything from the repositor
 - `scripts/aos/` — the installer, launcher and doctor behind `node aos.mjs`
 - `tests/` — `npm test`
 
-The folder name must stay `obsidian-v2`, next to `hugo-v2`: the HUD imports shared code from here.
+The folder name must stay `obsidian-v2`, next to `jarvis-v2`: the HUD imports shared code from here.

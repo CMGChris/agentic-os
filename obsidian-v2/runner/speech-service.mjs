@@ -9,7 +9,7 @@ export function spokenFlow(text){
 }
 export async function resolveSpeechService(configured,request=fetch){
  if(configured){
-  if(!localServices.includes(configured))throw new Error('Speech must use the local Hugo or V2 service.');
+  if(!localServices.includes(configured))throw new Error('Speech must use the local Jarvis or V2 service.');
   return configured;
  }
  // A bridge restart must reuse the existing healthy service, not silently

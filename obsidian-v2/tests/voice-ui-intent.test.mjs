@@ -18,7 +18,7 @@ const accepted=[
  ['Switch to graph view',command('graph:open')],
  ['Show me the vault graph',command('graph:open')],
  ['Open up a terminal for me',command('terminal:open-terminal.default.root')],
- ['Hey Hugo, launch the terminal',command('terminal:open-terminal.default.root')],
+ ['Hey Jarvis, launch the terminal',command('terminal:open-terminal.default.root')],
  ['Toggle the left sidebar please',command('app:toggle-left-sidebar')],
  ['Toggle my right side bar',command('app:toggle-right-sidebar')],
  ['Go back please',command('app:go-back')],

@@ -9,7 +9,7 @@ import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPa
 import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 
 // ---------------------------------------------------------------------------
-// GRAPH CORE — ported from hugo-hud/components/GraphCore.tsx (Preact build).
+// GRAPH CORE — ported from jarvis-hud/components/GraphCore.tsx (Preact build).
 // Volumetric knowledge-graph cloud: ~2200 nodes, center-dense, linked to
 // nearest neighbors, constant slow rotation + per-node wander, speech pulses
 // brightness across the whole cloud, UnrealBloom for the glow.

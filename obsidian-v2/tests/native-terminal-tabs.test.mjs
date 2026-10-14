@@ -11,7 +11,7 @@ const stubs={
  preact:'export const h=()=>null,render=()=>{};',
  'work-view':`export const WORK_VIEW='aos-v2-work';export class WorkView{constructor(taskId=null){this.taskId=taskId}}`,
  view:`export const COCKPIT_VIEW_TYPE='dashboard';export class CockpitView{}`,
- settings:'export const DEFAULT_SETTINGS={};export class CuriositySettingTab{};',
+ settings:'export const DEFAULT_SETTINGS={};export class ChaseSettingTab{};',
  'lib/work':`let provider='codex',current={codex:null,claude:null},stored={...current},tasks=[],refreshFailure=false;export const choices=[],apiCalls=[];export let refreshes=0;
  export function resetWork(){provider='codex';current={codex:null,claude:null};stored={...current};tasks=[];refreshFailure=false;choices.length=0;apiCalls.length=0;refreshes=0}
  export const workTarget=(p=provider)=>current[p];export function setWorkProvider(p){provider=p}

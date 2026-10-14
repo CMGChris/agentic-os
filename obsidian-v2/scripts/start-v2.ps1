@@ -1,6 +1,6 @@
 param(
- [string]$SpeechAssets = "$env:USERPROFILE\projects\hugo-hud\voice-server",
- [string]$SpeechPython = "$env:USERPROFILE\projects\hugo-hud\voice-server\.venv\Scripts\python.exe",
+ [string]$SpeechAssets = "$env:USERPROFILE\projects\jarvis-hud\voice-server",
+ [string]$SpeechPython = "$env:USERPROFILE\projects\jarvis-hud\voice-server\.venv\Scripts\python.exe",
  [string]$LogDirectory = (Join-Path $PSScriptRoot '..\.runtime')
 )
 $ErrorActionPreference = 'Stop'

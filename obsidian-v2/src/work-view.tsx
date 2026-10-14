@@ -5,14 +5,14 @@ import {readSelection} from './lib/provider';
 import {assertVoiceVault} from './lib/v2-voice';
 import {workFeed,type WorkTask} from './lib/work';
 import {shortTaskTitle,taskStatus} from '../shared/work-presentation';
-import type CuriosityCommandCenter from './main';
+import type ChaseCommandCenter from './main';
 export const WORK_VIEW='aos-v2-work';
 export class WorkView extends ItemView {
  taskId:string|null=null;
  private title='Terminals';
  private mounted=false;
  private unsubscribe?:()=>void;
- constructor(leaf:WorkspaceLeaf,private plugin:CuriosityCommandCenter){super(leaf)}
+ constructor(leaf:WorkspaceLeaf,private plugin:ChaseCommandCenter){super(leaf)}
  getViewType(){return WORK_VIEW}
  getDisplayText(){return this.title}
  getIcon(){return 'terminal'}

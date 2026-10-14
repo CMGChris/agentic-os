@@ -36,7 +36,7 @@ for(const provider of ['codex','claude'])for(const scope of ['native','web']){
    const expected=f.write(`${folder}/${localDate()}-${key}.md`);
    for(const utterance of [
     `Can you pull up the ${name} for me?`,
-    `Hey Hugo, could you please, like, bring up my latest ${name}, please?`,
+    `Hey Jarvis, could you please, like, bring up my latest ${name}, please?`,
     `Open the ${name}.`,
     `Show me the ${name}, thanks.`,
     `All right, can you pull up that ${name}?`,

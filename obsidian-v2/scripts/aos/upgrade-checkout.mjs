@@ -8,12 +8,12 @@ import {spawnSync} from 'node:child_process';
 
 const protectedNames = new Set(['jev.json', 'bridge-auth.json', 'providers.json', '.credentials.json']);
 const protectedDirectories = new Set(['.runtime', '.credentials', 'credentials', '.secrets', 'secrets']);
-const officialHttps = 'https://github.com/CMGChris/agentic-os.git';
+const officialHttps = 'https://github.com/ctskool/agentic-os-starter-v2.git';
 // Git for Windows rejects Node's \\.\nul spelling; its native NUL device works.
 const gitNull = process.platform === 'win32' ? 'NUL' : os.devNull;
 // Assemble the public SSH address so the export's private-email scan remains strict.
-const officialSsh = ['git', 'github.com:CMGChris/agentic-os.git'].join('@');
-const officialOrigins = new Set(['https://github.com/CMGChris/agentic-os', officialHttps, officialSsh]);
+const officialSsh = ['git', 'github.com:ctskool/agentic-os-starter-v2.git'].join('@');
+const officialOrigins = new Set(['https://github.com/ctskool/agentic-os-starter-v2', officialHttps, officialSsh]);
 const controls = /[\x00-\x1f\x7f-\x9f]/;
 const samePath = (left, right) => process.platform === 'win32' ? left.toLowerCase() === right.toLowerCase() : left === right;
 const safeRelative = name => typeof name === 'string' && name.length < 4096 && !controls.test(name) && !path.isAbsolute(name) && !name.includes('\\') && name.split('/').every(part => part && part !== '.' && part !== '..');
@@ -106,7 +106,7 @@ export function assessCheckout(installPath, {run = spawnSync, env = process.env}
     if (!inspect(supplied)?.isDirectory()) return issue('The installation folder does not exist or is not a directory.');
     const repositoryPath = fs.realpathSync.native(path.basename(supplied).toLowerCase() === 'obsidian-v2' ? path.dirname(supplied) : supplied);
     result.repositoryPath = repositoryPath;
-    for (const [name, directory] of [['aos.mjs', false], ['obsidian-v2', true], ['hugo-v2', true], ['VERSION.json', false]]) {
+    for (const [name, directory] of [['aos.mjs', false], ['obsidian-v2', true], ['jarvis-v2', true], ['VERSION.json', false]]) {
       const file = path.join(repositoryPath, name); noLinks(file, checked);
       const stat = inspect(file);
       if (!stat || (directory ? !stat.isDirectory() : !stat.isFile())) return issue('This folder does not have the complete exported starter layout.');

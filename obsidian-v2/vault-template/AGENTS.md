@@ -103,7 +103,7 @@ Bases sidebar filters `status != done AND status != archived`. Non-canonical val
 | Morning Intel, Morning Report, Inbox Brief, Weekly Review, YouTube Review, Trend Scan, Lead Research, Angles, Outline, Cascade, Deep Research | one new report under `inbox/reports/<kind>/` or `inbox/research/` |
 | GitHub Trending, Pull Metrics | `inbox/research/github-trending/`, `system/metrics/` (scripts, no model) |
 | Voice answers that are long | `inbox/voice/` |
-| Agentic OS V2 plugin + Hugo HUD | checkbox toggles and priority edits in today's daily note, through the bridge |
+| Agentic OS V2 plugin + Jarvis HUD | checkbox toggles and priority edits in today's daily note, through the bridge |
 
 Workflows never send messages, publish, schedule posts or delete notes. Reports are drafts for you to read.
 

@@ -7,7 +7,7 @@ import {spawnSync} from 'node:child_process';
 import {assessCheckout, prepareStockUpdate} from '../scripts/aos/upgrade-checkout.mjs';
 import {update} from '../scripts/aos/setup.mjs';
 
-const official = 'https://github.com/CMGChris/agentic-os.git';
+const official = 'https://github.com/ctskool/agentic-os-starter-v2.git';
 // Windows CI can expose TEMP as RUNNER~1; use the same native canonical form
 // as the assessor instead of comparing that alias with its runneradmin path.
 const tempRoot = fs.realpathSync.native(os.tmpdir());
@@ -30,12 +30,12 @@ function git(root, args, input) {
 }
 function fixture(t) {
   const root = scratch(t);
-  for (const directory of ['obsidian-v2', 'hugo-v2']) fs.mkdirSync(path.join(root, directory));
+  for (const directory of ['obsidian-v2', 'jarvis-v2']) fs.mkdirSync(path.join(root, directory));
   fs.writeFileSync(path.join(root, 'aos.mjs'), '// synthetic launcher\n');
   fs.writeFileSync(path.join(root, 'VERSION.json'), JSON.stringify({plugin: '0.1.0', hud: '0.1.0', bridgeCommit: 'abc1234', hudCommit: 'def5678'}));
   fs.writeFileSync(path.join(root, '.gitignore'), 'node_modules/\n.runtime/\n.next/\n');
   fs.writeFileSync(path.join(root, 'obsidian-v2', 'example.txt'), 'one\n');
-  fs.writeFileSync(path.join(root, 'hugo-v2', 'example.txt'), 'hud\n');
+  fs.writeFileSync(path.join(root, 'jarvis-v2', 'example.txt'), 'hud\n');
   git(root, ['init', '--initial-branch=main']);
   git(root, ['add', '--', '.']); git(root, ['commit', '-m', 'Synthetic starter']);
   git(root, ['remote', 'add', 'origin', official]);
@@ -54,7 +54,7 @@ test('clean official main tracking origin/main is eligible from the repository r
   assert.equal(value.repositoryPath, root); assert.equal(value.head, head); assert.equal(value.branch, 'main');
   assert.deepEqual(value.issues, []); assert.deepEqual(value.changes, []);
   assert.deepEqual(assessCheckout(child), value);
-  for (const origin of [official.slice(0, -4), ['git', 'github.com:CMGChris/agentic-os.git'].join('@')]) {
+  for (const origin of [official.slice(0, -4), ['git', 'github.com:ctskool/agentic-os-starter-v2.git'].join('@')]) {
     git(root, ['remote', 'set-url', 'origin', origin]); assert.equal(assessCheckout(root).updateAllowed, true);
   }
 });

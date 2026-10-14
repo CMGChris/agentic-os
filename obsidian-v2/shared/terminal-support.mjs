@@ -4,7 +4,7 @@
 // verified against its sources or treated with care. Shared by the plugin and
 // the doctor; keep it browser-compatible (no Node imports).
 export const VERIFIED_TERMINAL_VERSIONS = Object.freeze(['3.27.1', '3.27.2']);
-export const HUGO_URL = 'http://127.0.0.1:3217';
+export const JARVIS_URL = 'http://127.0.0.1:3217';
 
 const IDENT = '(?:0|[1-9]\\d*|\\d*[A-Za-z-][0-9A-Za-z-]*)';
 const SEMVER = new RegExp(`^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-(${IDENT}(?:\\.${IDENT})*))?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$`);
@@ -23,21 +23,21 @@ const tested = VERIFIED_TERMINAL_VERSIONS.join(', ');
  * 3.x newer than every verified version) always comes with its message. */
 export function terminalSupport(version) {
   if (version === undefined || version === null || (typeof version === 'string' && !version.trim())) return {status: 'missing', version: null,
-    message: `Conversations inside Obsidian need the Terminal community plugin (by polyipseity). Install it from Settings → Community plugins, or use the same button in Hugo at ${HUGO_URL}.`};
+    message: `Conversations inside Obsidian need the Terminal community plugin (by polyipseity). Install it from Settings → Community plugins, or use the same button in Jarvis at ${JARVIS_URL}.`};
   const text = String(version), parsed = typeof version === 'string' ? parse(version) : null;
   const notVerified = {status: 'unsupported', version: text,
-    message: `Terminal ${text} has not been verified with Agentic OS. Use Hugo at ${HUGO_URL} until Agentic OS is updated (node aos.mjs update).`};
+    message: `Terminal ${text} has not been verified with Agentic OS. Use Jarvis at ${JARVIS_URL} until Agentic OS is updated (node aos.mjs update).`};
   if (!parsed) return notVerified;
   if (verified.some(entry => !compare(entry.core, parsed.core) && entry.prerelease === parsed.prerelease)) return {status: 'verified', version: text, message: ''};
   if (parsed.prerelease) return {status: 'unsupported', version: text,
-    message: `Pre-release Terminal versions (${text}) are not supported by Agentic OS. Install the regular release from Settings → Community plugins, or use Hugo at ${HUGO_URL}.`};
+    message: `Pre-release Terminal versions (${text}) are not supported by Agentic OS. Install the regular release from Settings → Community plugins, or use Jarvis at ${JARVIS_URL}.`};
   if (parsed.core[0] === highest[0] && compare(parsed.core, highest) > 0) return {status: 'untested', version: text,
-    message: `Terminal ${text} is newer than the versions tested with Agentic OS (${tested}). Conversations should still work; if one misbehaves, use the same button in Hugo at ${HUGO_URL} and run the doctor.`};
+    message: `Terminal ${text} is newer than the versions tested with Agentic OS (${tested}). Conversations should still work; if one misbehaves, use the same button in Jarvis at ${JARVIS_URL} and run the doctor.`};
   if (compare(parsed.core, lowest) < 0) return {status: 'unsupported', version: text,
-    message: `Terminal ${text} is too old for Agentic OS. Update it in Settings → Community plugins, or use Hugo at ${HUGO_URL}.`};
+    message: `Terminal ${text} is too old for Agentic OS. Update it in Settings → Community plugins, or use Jarvis at ${JARVIS_URL}.`};
   return notVerified;
 }
 
 /** The message when an untested Terminal opened a conversation's tab but its
  * process could not be followed. It may be running, so nothing is relaunched. */
-export const untrackedLaunchMessage = version => `Terminal ${version} opened this conversation, but Agentic OS cannot follow it in this Terminal version. It may still be running: check that tab and close it before trying again. For tracked conversations and voice follow-ups use Hugo at ${HUGO_URL}, and run the doctor.`;
+export const untrackedLaunchMessage = version => `Terminal ${version} opened this conversation, but Agentic OS cannot follow it in this Terminal version. It may still be running: check that tab and close it before trying again. For tracked conversations and voice follow-ups use Jarvis at ${JARVIS_URL}, and run the doctor.`;

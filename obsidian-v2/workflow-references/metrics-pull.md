@@ -64,5 +64,5 @@ Scripts may be run any frequency — each invocation = one new row per source. P
 ## See also
 
 - Schema: [[daily-note]] sibling — `system/schemas/` directory
-- Plugin consumer: `~/projects/curiosity-command-center/src/lib/metrics.ts`
+- Plugin consumer: `~/projects/chase-command-center/src/lib/metrics.ts`
 - Task Scheduler setup: [[reference_local-cron-pattern]] (M5)

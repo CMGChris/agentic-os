@@ -54,7 +54,7 @@ export function targetIndex(root,{now=Date.now()}={}){
 }
 
 // --- phrasing ----------------------------------------------------------------
-const PREAMBLE=/^(?:(?:hey|hi|hello|ok|okay|all right|alright|so|well|um|uh|hugo|astra|please|just|now|also|actually|and|then|yeah|yes|no)[,\s]+)+/;
+const PREAMBLE=/^(?:(?:hey|hi|hello|ok|okay|all right|alright|so|well|um|uh|jarvis|astra|please|just|now|also|actually|and|then|yeah|yes|no)[,\s]+)+/;
 const REQUEST=/^(?:(?:can|could|would|will|can't|couldn't|won't|why don't|why can't) you(?: please| just| also| maybe)?|would you mind|do you mind|are you able to|is it possible to|is there a way to|i(?: would|'d) (?:like|love|want) (?:you )?to|i (?:want|need|would like) (?:you )?to|i(?: would|'d) (?:like|love) to|i (?:want|need) to|let me|let's|go ahead and|please|just|quickly|real quick)[,\s]+/;
 // Bare "pull" and "bring" are workflow verbs ("pull metrics"); only the
 // phrasal forms mean display.
@@ -74,10 +74,10 @@ function imperativeWork(clause){
  for(let i=0;i<4;i++){const next=text.replace(PREAMBLE,'').replace(REQUEST,'').replace(SEQUENCE,'').trim();if(next===text)break;text=next}
  return WORK_VERB_START.test(text);
 }
-const TRAILING=/(?:[,.!?]*\s+(?:for me|please|thanks|thank you|hugo|again|back|back up|real quick|really quick|quick|quickly|right now|now|so (?:that )?i can (?:see|read|look at|review|check)(?: it| that| them)?|so i can see it|in (?:a |the |another |an |one of the |my )?(?:new |other |separate |different )?(?:obsidian )?(?:tabs?|windows?|panes?|notes?|viewer)|in obsidian|inside (?:of )?obsidian|on (?:the |my )?(?:screen|dashboard|hud|display)|in (?:the )?(?:dashboard|hud|web viewer|viewer)|here|there|on screen|up on (?:the )?screen|for a (?:sec|second|minute)))+[,.!?]*$/;
+const TRAILING=/(?:[,.!?]*\s+(?:for me|please|thanks|thank you|jarvis|again|back|back up|real quick|really quick|quick|quickly|right now|now|so (?:that )?i can (?:see|read|look at|review|check)(?: it| that| them)?|so i can see it|in (?:a |the |another |an |one of the |my )?(?:new |other |separate |different )?(?:obsidian )?(?:tabs?|windows?|panes?|notes?|viewer)|in obsidian|inside (?:of )?obsidian|on (?:the |my )?(?:screen|dashboard|hud|display)|in (?:the )?(?:dashboard|hud|web viewer|viewer)|here|there|on screen|up on (?:the )?screen|for a (?:sec|second|minute)))+[,.!?]*$/;
 const WHERE=/\b(?:on|to|in|over on|over to)\s+(?:the\s+|my\s+)?(right|left)(?:\s+(?:sidebar|side|panel|pane|hand side))?\b|\b(?:in|as)\s+a\s+split\b|\bsplit\s+(?:view|pane|screen)\b|\bside\s+by\s+side\b/;
 const WEB_OR_UI=/\b(?:calendar|gmail|google mail|youtube studio|terminal|terminals|dashboard|cockpit|command center|sidebar|settings|graph(?: view)?|search|command palette|repos?|repositor(?:y|ies))\b|\bgit\s?hub\b(?!\s+trending)|https?:\/\//;
-const STOP=new Set(['the','a','an','my','our','your','that','this','those','these','up','please','hugo','for','me','us','of','from','with','about','on','in','at','to','into','again','back','here','there','just','also','too','quick','quickly','real','really','so','can','i','we','it','and','then','now','some','any','kind','sort','like','thing','things','stuff','one','ones','file','files','note','notes','doc','docs','document','documents','page','pages','report','reports','result','results','output','outputs','answer','saved','latest','last','recent','most','newest','earlier','previous','old','older','new','version','copy','tab','tabs','window','obsidian','dashboard','screen','viewer']);
+const STOP=new Set(['the','a','an','my','our','your','that','this','those','these','up','please','jarvis','for','me','us','of','from','with','about','on','in','at','to','into','again','back','here','there','just','also','too','quick','quickly','real','really','so','can','i','we','it','and','then','now','some','any','kind','sort','like','thing','things','stuff','one','ones','file','files','note','notes','doc','docs','document','documents','page','pages','report','reports','result','results','output','outputs','answer','saved','latest','last','recent','most','newest','earlier','previous','old','older','new','version','copy','tab','tabs','window','obsidian','dashboard','screen','viewer']);
 const GENERIC=new Set(['it','that','this','them','those','these','one','ones','thing','stuff','file','files','doc','docs','document','documents','note','notes','page','pages','report','reports','result','results','output','outputs','answer','explainer','image','images','graphic','graphics','picture','pictures','photo','diagram','diagrams','chart','charts','visual','visuals','visualization','visualisation','pdf','deck','slides','slide','version','draft','summary','brief','html','you','made','created','built','generated','mentioned','wrote','produced','put','together','sent','gave','showed','earlier','last','latest','previous','recent','again','conversation','task','worker','codex','claude','just','saved','said','from','of','the','a','an','that','were','was','talking','about','with','me','up','up']);
 const REPORT_WORDS=new Set(['report','reports','brief','briefing','sweep','scan','list','repos','repositories','triage','audit','summary','file','note','version','copy','one','thing']);
 // Section and detail questions belong to the brief readers, not to file opening.
@@ -87,7 +87,7 @@ const BY_WORKER=/\b(?:you|it|the (?:agent|worker|assistant|codex|claude|terminal
 const PDF_HINT=/\bpdf|deck|slides?\b/;
 const DOC_HINT=/\b(?:note|notes|doc|docs|document|documents|markdown|summary|brief|report|write-?up|explainer|page)\b/;
 const ORDINAL=/^(?:(?:the|number)\s+)?(first|second|third|fourth|fifth|1st|2nd|3rd|4th|5th|1|2|3|4|5|one|two|three|four|five|top|last)(?:\s+one)?\b[.!?\s]*$/;
-const AFFIRM=/^(?:yes(?: please)?|yeah|yep|sure|absolutely|go ahead|do (?:it|that)|please do|go for it|sounds good|that one|that works|ok(?:ay)?)(?: please)?(?: hugo)?[.!?\s]*$/i;
+const AFFIRM=/^(?:yes(?: please)?|yeah|yep|sure|absolutely|go ahead|do (?:it|that)|please do|go for it|sounds good|that one|that works|ok(?:ay)?)(?: please)?(?: jarvis)?[.!?\s]*$/i;
 
 export function openIntent(transcript){
  if(typeof transcript!=='string')return null;
@@ -252,7 +252,7 @@ function undisplayableLink(task,root){
 const RUN_DIRS=['system/runs','system/v2/runs'];
 const SKILL_STOP=new Set([...STOP,'report','reports','run','runs','result','results','output','outputs','deliverable','file','files','doc','document']);
 // A workflow name needs one word of its own; "today" or "morning" alone is not one.
-const SKILL_GENERIC=new Set(['today','tomorrow','morning','weekly','daily','pull','build','run','ask','ai','yt','curiosity','research','review','plan','outline','angles','summary']);
+const SKILL_GENERIC=new Set(['today','tomorrow','morning','weekly','daily','pull','build','run','ask','ai','yt','chase','research','review','plan','outline','angles','summary']);
 const runCache=new Map();
 function safeRunDeliverable(root,relative){
  if(typeof relative!=='string'||!relative.endsWith('.md')||path.isAbsolute(relative)||relative.includes('\\')||relative.split('/').some(p=>!p||p==='..'||p.startsWith('.')))return null;
@@ -456,7 +456,7 @@ export function describeCandidates(candidates){
 // uses any of it, and none of it reads or writes the caches above.
 // No two alternatives may match the same words: a run of them followed by anything else is otherwise retried
 // in 2^n ways ("on screen" used to be listed twice, once inside "on (the |my )?screen").
-const GIVEN_TRAILING=/(?:[,\s]+(?:for me|please|thanks|thank you|hugo|astra|again|real quick|really quick|quickly|right now|now|in obsidian|inside (?:of )?obsidian|up on (?:the |my )?screen|on (?:the |my )?screen))+$/;
+const GIVEN_TRAILING=/(?:[,\s]+(?:for me|please|thanks|thank you|jarvis|astra|again|real quick|really quick|quickly|right now|now|in obsidian|inside (?:of )?obsidian|up on (?:the |my )?screen|on (?:the |my )?screen))+$/;
 const GIVEN_REFUSED=/\b(?:don't|do not|never|not|no|without|unless|instead|only|after|once|until|before|when|whenever|if|later|tomorrow|tonight|how|why|what|where|which|who|whose|whether|explain|tell|describe|summari[sz]e|read)\b|[;:]/;
 // Opens land in the default place only. A tab request is not the default: the
 // executor reuses a leaf that already shows the file, wherever that leaf is.

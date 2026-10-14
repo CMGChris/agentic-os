@@ -50,7 +50,7 @@ export function readAccountLimits() {
             if (m.method && m.id != null)
                 send({ id: m.id, error: { code: -32601, message: 'This client only reads account usage.' } });
         });
-        send({ id: 0, method: 'initialize', params: { clientInfo: { name: 'hugo_usage', title: 'Hugo account usage', version: '0.1.0' } } });
+        send({ id: 0, method: 'initialize', params: { clientInfo: { name: 'jarvis_usage', title: 'Jarvis account usage', version: '0.1.0' } } });
     });
 }
 let cached = null, nextRead = 0, inflight = null;

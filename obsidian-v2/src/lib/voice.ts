@@ -1,9 +1,9 @@
 import { requestUrl } from "obsidian";
 
 // ---------------------------------------------------------------------------
-// Voice sidecar client — ported from hugo-hud/lib/voiceClient.ts.
+// Voice sidecar client — ported from jarvis-hud/lib/voiceClient.ts.
 // The cockpit doesn't run its own STT/TTS/router; it talks to the two local
-// Hugo servers:
+// Jarvis servers:
 //   - HUD server (Next, :3107): /api/voice (PTT clip), /api/voice/text
 //     (wake transcript), /api/speak (Kokoro TTS proxy + config probe)
 //   - voice-server (Python, :3108): ws /events (wake word push)
@@ -33,7 +33,7 @@ export interface VoicePayload {
 	obsidian?: ObsidianAction | null;
 }
 
-/** UI action the orb executes via the Obsidian API — mirrors the hugo
+/** UI action the orb executes via the Obsidian API — mirrors the jarvis
  *  router's ObsidianAction type */
 export type ObsidianWhere = "tab" | "split" | "right-sidebar" | "left-sidebar";
 export type ObsidianAction =
@@ -99,7 +99,7 @@ export class VoiceSidecar {
 			}
 		} catch {
 			this.disabled = true;
-			this.log("err", "voice offline — hugo HUD server on :3107 is down");
+			this.log("err", "voice offline — jarvis HUD server on :3107 is down");
 		}
 		this.connectWake();
 	}
@@ -162,7 +162,7 @@ export class VoiceSidecar {
 			this.log(
 				"ok",
 				e.wake
-					? 'wake word armed — say "hey Hugo"'
+					? 'wake word armed — say "hey Jarvis"'
 					: "voice link up — push-to-talk only",
 			);
 		} else if (e.type === "wake") {
@@ -295,11 +295,11 @@ export class VoiceSidecar {
 	/** begin PTT recording; resolves false if mic unavailable or voice offline */
 	async startCapture(): Promise<boolean> {
 		if (this.disabled) {
-			this.log("err", "voice offline — start the hugo sidecar first");
+			this.log("err", "voice offline — start the jarvis sidecar first");
 			return false;
 		}
 		if (this.recorder) return true;
-		this.stop(); // barge-in: opening the mic shuts Hugo up
+		this.stop(); // barge-in: opening the mic shuts Jarvis up
 		try {
 			// keep the stream alive between captures — re-acquiring adds ~200ms
 			if (!this.micStream) {
@@ -370,7 +370,7 @@ export class VoiceSidecar {
 			this.onDeliverableCb(j.deliverable, j.reveal === "open");
 		}
 		if (j.reply) {
-			this.log("ok", `hugo · ${j.reply}`);
+			this.log("ok", `jarvis · ${j.reply}`);
 			this.speak(j.reply);
 		} else if (!j.queued && !j.obsidian && !j.deliverable) {
 			this.log("sys", `heard "${j.transcript ?? "?"}" — nothing to do`);
@@ -386,7 +386,7 @@ export class VoiceSidecar {
 		this.timeData = new Uint8Array(this.analyser.fftSize);
 		this.analyser.connect(this.ctx.destination);
 
-		// "sheen" chain — the Hugo-in-the-suit timbre: highpass strips
+		// "sheen" chain — the Jarvis-in-the-suit timbre: highpass strips
 		// sub-rumble, presence peak lifts intelligibility, short convolution
 		// reverb at low wet adds the helmet-metal air. Analyser sits after
 		// the mix so the orb mouths what's actually heard.
@@ -438,7 +438,7 @@ export class VoiceSidecar {
 		await ctx.resume().catch(() => {});
 		const url = `${this.hudUrl}/api/speak?text=${encodeURIComponent(text)}`;
 		// streaming first — Kokoro sentence-chunks the WAV so playback starts
-		// after the first sentence. Needs the CORS headers the hugo server
+		// after the first sentence. Needs the CORS headers the jarvis server
 		// now sends; if anything trips, fall back to full-buffer decode.
 		try {
 			await this.playStreaming(ctx, url);

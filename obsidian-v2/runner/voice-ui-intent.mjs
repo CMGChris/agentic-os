@@ -3,9 +3,9 @@
 // parser must account for every spoken word, the result still passes the same
 // validators as model output, and the validated action must equal what was
 // parsed here. Anything else returns a refusal and the model decides as before.
-const PREAMBLE=/^(?:(?:hey|hi|hello|ok|okay|all right|alright|so|well|um|uh|hugo|astra|please|just|now)[,\s]+)+/;
+const PREAMBLE=/^(?:(?:hey|hi|hello|ok|okay|all right|alright|so|well|um|uh|jarvis|astra|please|just|now)[,\s]+)+/;
 const REQUEST=/^(?:(?:can|could|would|will) you(?: please| just)?|would you mind|go ahead and|please|just|quickly|real quick)[,\s]+/;
-const TRAILING=/(?:[,\s]+(?:for me|please|thanks|thank you|hugo|astra|real quick|really quick|quickly|right now|now))+$/;
+const TRAILING=/(?:[,\s]+(?:for me|please|thanks|thank you|jarvis|astra|real quick|really quick|quickly|right now|now))+$/;
 // Negation, conditions, questions and second clauses never describe one plain
 // command. The row patterns below are anchored to the whole utterance, so this
 // list is a second line of defence, not the only one.

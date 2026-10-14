@@ -7,7 +7,7 @@ creation date), classifies AI/dev relevance, writes a markdown file at:
 
     <VAULT>/inbox/research/github-trending/YYYY-MM-DD-trending.md
 
-Format mirrors legacy capture so curiosity-command-center's parseTrendingRepos()
+Format mirrors legacy capture so chase-command-center's parseTrendingRepos()
 keeps rendering. Frozen schema — see skill.md.
 
 The velocity metric needs cross-run state: each run snapshots star counts of an

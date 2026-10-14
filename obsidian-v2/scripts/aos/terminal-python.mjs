@@ -24,7 +24,7 @@ export function terminalPythonWorks(python, {run = spawnSync, platform = process
 }
 
 // 'ready' | 'installed' | 'no-python' | 'deferred' | 'failed'. Never throws: conversations still run
-// in Hugo. The environment is only created, repaired or replaced when nothing runs from it
+// in Jarvis. The environment is only created, repaired or replaced when nothing runs from it
 // (conversations open inside Obsidian run their helper from it); unknown counts as in use.
 export function prepareTerminalPython(at, {log = console.log, run = spawnSync, platform = process.platform, find = options => findPython({run, platform, range: TERMINAL_PYTHON, ...options}),
   inUse = dir => processesUsing(dir, {platform}), rename = fs.renameSync, now = Date.now} = {}) {
@@ -38,13 +38,13 @@ export function prepareTerminalPython(at, {log = console.log, run = spawnSync, p
     if (check()) { record(); log('-> Conversations inside Obsidian: Python helper ready'); return 'installed'; }
     if (fs.existsSync(venv)) {
       const users = inUse(venv);
-      if (users === null || users.length) { log('-> Conversations inside Obsidian: the Python helper needs repairing, but a conversation inside Obsidian may be using it. Close those conversations and run `node aos.mjs setup` again; meanwhile use the same buttons in Hugo.'); return 'deferred'; }
+      if (users === null || users.length) { log('-> Conversations inside Obsidian: the Python helper needs repairing, but a conversation inside Obsidian may be using it. Close those conversations and run `node aos.mjs setup` again; meanwhile use the same buttons in Jarvis.'); return 'deferred'; }
     }
     const seen = [], base = find({seen});
     const current = fs.existsSync(python) ? run(python, ['--version'], {encoding: 'utf8', timeout: 10000, windowsHide: true}) : null;
     const currentOk = current?.status === 0 && pythonSupported(parsePythonVersion(current.stdout || current.stderr), TERMINAL_PYTHON);
     if (!currentOk) {
-      if (!base) { log(`-> Conversations inside Obsidian: no usable Python found${seen.length ? ` (found ${seen.join(', ')})` : ''}. Install Python 3.12 (Windows: \`winget install Python.Python.3.12\`; Mac: \`xcode-select --install\` or \`brew install python@3.12\`) and run setup again, or use the same buttons in Hugo.`); return 'no-python'; }
+      if (!base) { log(`-> Conversations inside Obsidian: no usable Python found${seen.length ? ` (found ${seen.join(', ')})` : ''}. Install Python 3.12 (Windows: \`winget install Python.Python.3.12\`; Mac: \`xcode-select --install\` or \`brew install python@3.12\`) and run setup again, or use the same buttons in Jarvis.`); return 'no-python'; }
       if (fs.existsSync(venv)) {
         // Moved away first: Windows refuses to rename a folder a running program uses, so nothing is half-deleted.
         const aside = `${venv}.old-${now()}`;
@@ -64,7 +64,7 @@ export function prepareTerminalPython(at, {log = console.log, run = spawnSync, p
     return 'installed';
   } catch (error) {
     fs.rmSync(marker, {force: true});
-    log(`-> Conversations inside Obsidian: the Python helper could not be prepared (${String(error.message || error).slice(0, 300)}). Run setup again later, or use the same buttons in Hugo.`);
+    log(`-> Conversations inside Obsidian: the Python helper could not be prepared (${String(error.message || error).slice(0, 300)}). Run setup again later, or use the same buttons in Jarvis.`);
     return 'failed';
   }
 }

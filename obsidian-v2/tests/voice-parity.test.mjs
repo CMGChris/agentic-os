@@ -32,7 +32,7 @@ test('all 16 original Claude routing regressions retain their intent semantics',
   ['Based on these new GitHub trending repos for today, do you have any you think we should create a video about? Maybe like three of them?',3,'fallthrough'],
   ['do you think the github trending stuff matters this week?',3,'fallthrough'],['can you run the inbox audit for me when you get a chance',3,'fallthrough'],
   ["once you're done with that inbox brief tell me about fable 5",3,'fallthrough'],["what's going on with the github trending report today",3,'fallthrough'],
-  ['give me the rundown',2],['hey hugo brief me',2],['can you hear me',2],['how many subscribers do I have',2],["what's in the queue",2],
+  ['give me the rundown',2],['hey jarvis brief me',2],['can you hear me',2],['how many subscribers do I have',2],["what's in the queue",2],
   ['run the github trending',2,'running'],['run github trending again',1,'github-trending','running']
  ];
  withVoiceContext({root,exchanges:[]},()=>{for(const [utterance,tier,expected,running]of cases){const state=empty();if(expected==='running'||running)state.runs=[{skill:'github-trending',status:'running'}];const result=rules.inFlightGuard(rules.rulesRoute(utterance,state),utterance,state);assert.equal(result.tier,tier,utterance);if(expected==='fallthrough')assert.equal(result.fallthrough,true,utterance);else if(expected==='running')assert.match(result.reply,/already running/);else if(expected)assert.equal(result.skill,expected,utterance)}});
@@ -50,8 +50,8 @@ for(const provider of ['codex','claude']){
   assert.equal(work.tier,3);assert.equal(work.legacySchema,true);assert.equal(f.calls.length,1);assert.equal(f.calls[0].kind,'start');
   assert.equal(work.model,provider==='codex'?'gpt-5.6-luna':'haiku');assert.equal(work.workerModel,provider==='codex'?'gpt-6-astra':'sonnet');
   const receipt=JSON.parse(fs.readFileSync(path.join(f.root,'system/v2/voice-results',work.id+'.json'),'utf8'));assert.equal(receipt.legacySchema,true);
-  const workflow=await f.speak(provider,'Could you help me research the broader field thoroughly?',output({action:'task',skill:'deep-research-curiosity',args:{topic:'Agent evaluations'},reply:'Starting research.'}));
-  assert.equal(workflow.legacySchema,true);assert.equal(f.calls[1].kind,'workflow');assert.equal(f.calls[1].skill,'deep-research-curiosity');
+  const workflow=await f.speak(provider,'Could you help me research the broader field thoroughly?',output({action:'task',skill:'deep-research-chase',args:{topic:'Agent evaluations'},reply:'Starting research.'}));
+  assert.equal(workflow.legacySchema,true);assert.equal(f.calls[1].kind,'workflow');assert.equal(f.calls[1].skill,'deep-research-chase');
  });
  test(`${provider}: classifier passes explicit system/user parts without splitting text markers`,async t=>{
   const f=fixture(t),utterance='What is the second one about?';

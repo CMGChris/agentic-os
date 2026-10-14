@@ -44,7 +44,7 @@ test('sequential managed workflows keep old outputs and reject old completion re
 test('continued workflow IDs deduplicate pending and historical runs without redispatch or cross-task reuse',t=>{
  const {root,manager,processes}=fixture(t),task=manager.start({selection,prompt:'Conversation'});
  manager.accept(task.id,{type:'complete',turnId:'initial',text:'Ready'});
- const id=crypto.randomUUID(),request={id,selection,skill:'deep-research-curiosity',args:{topic:'Original topic'}};
+ const id=crypto.randomUUID(),request={id,selection,skill:'deep-research-chase',args:{topic:'Original topic'}};
  manager.continueWorkflow(task.id,request);const pending=JSON.stringify(task),writes=processes[0].writes.length;
  assert.equal(manager.continueWorkflow(task.id,request),task);assert.equal(manager.startWorkflow(request),task);assert.equal(JSON.stringify(task),pending);assert.equal(processes[0].writes.length,writes);
  assert.throws(()=>manager.continueWorkflow(task.id,{...request,args:{topic:'Different topic'}}),/already used/);

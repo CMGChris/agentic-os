@@ -1,9 +1,9 @@
 import { h } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
-import type CuriosityCommandCenter from '../main';
+import type ChaseCommandCenter from '../main';
 import GalaxyCore from './GalaxyCore';
 import StarField from './StarField';
-export function ProviderBackdrop({plugin,busy,active}:{plugin:CuriosityCommandCenter;busy:boolean;active:boolean}){
+export function ProviderBackdrop({plugin,busy,active}:{plugin:ChaseCommandCenter;busy:boolean;active:boolean}){
  const [visited,setVisited]=useState(active);
  useEffect(()=>{if(active)setVisited(true)},[active]);
  const [paused,setPaused]=useState(plugin.settings.pauseMotion);

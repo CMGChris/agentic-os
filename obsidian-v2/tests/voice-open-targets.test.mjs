@@ -20,7 +20,7 @@ function vault(t){
   'projects/2026-05-10-skoot-crm-playbook.md','projects/proposals/2026-06-01-dario-proposal.md',
   'projects/2026-04-30-content-backfill-plan.md','projects/2026-05-02-content-calendar-plan.md',
   'projects/archive/2026-01-05-old-content-backfill-plan.md',
-  'wiki/agentic-os/hugo-hud.md','wiki/_index.md','system/v2/artifacts/files/abc.png','.obsidian/plugins/x/main.js',
+  'wiki/agentic-os/jarvis-hud.md','wiki/_index.md','system/v2/artifacts/files/abc.png','.obsidian/plugins/x/main.js',
  ])write(rel);
  fs.mkdirSync(path.join(root,'inbox/demo-assets'),{recursive:true});
  fs.writeFileSync(path.join(root,'inbox/demo-assets/agentic-os-diagram.png'),Buffer.from([137,80,78,71]));
@@ -51,7 +51,7 @@ test('named reports resolve to the newest file, a spoken date, or an honest miss
  assert.equal(resolve(root,'show me the top story in the brief'),null);
  assert.equal(resolve(root,'show me the graphic you made from the morning intel brief').kind,'unresolved');
  assert.equal(resolve(root,'open the morning intel video plan').kind,'unresolved');
- const offered=resolve(root,'yes',{exchanges:[{ts:new Date(now.getTime()-5000).toISOString(),you:'pull up the intel from monday',hugo:'offer',lookup:{source:'open-offer',path:monday.nearest.path,label:monday.nearest.label}}]});
+ const offered=resolve(root,'yes',{exchanges:[{ts:new Date(now.getTime()-5000).toISOString(),you:'pull up the intel from monday',jarvis:'offer',lookup:{source:'open-offer',path:monday.nearest.path,label:monday.nearest.label}}]});
  assert.equal(offered.kind,'note');assert.equal(offered.path,'inbox/research/morning-intel/2026-09-12-intel.md');
  const week=resolve(root,"show me last week's weekly review");assert.equal(week.kind,'report');assert.equal(week.path,'inbox/reports/weekly/2026-09-13-weekly-review.md');
  assert.equal(resolve(root,'open the youtube weekly review').path,'inbox/reports/yt-reviews/2026-09-13-yt-week-review.md');
@@ -79,11 +79,11 @@ test('named notes match by title words, tolerate speech errors, and ask when two
  assert.equal(resolve(root,'open the scoot CRM playbook').path,'projects/2026-05-10-skoot-crm-playbook.md');
  assert.equal(resolve(root,'open my proposal for Dorio').path,'projects/proposals/2026-06-01-dario-proposal.md');
  const placed=resolve(root,'open the skoot playbook on the right');assert.equal(placed.where,'right-sidebar');
- assert.equal(resolve(root,'open the hugo hud note').path,'wiki/agentic-os/hugo-hud.md');
+ assert.equal(resolve(root,'open the jarvis hud note').path,'wiki/agentic-os/jarvis-hud.md');
  const ambiguous=resolve(root,'open the content plan');
  assert.equal(ambiguous.kind,'ambiguous');assert.deepEqual(ambiguous.candidates.map(c=>c.path),['projects/2026-05-02-content-calendar-plan.md','projects/2026-04-30-content-backfill-plan.md']);
  assert.equal(describeCandidates(ambiguous.candidates),'content calendar plan or content backfill plan');
- const exchanges=[{ts:new Date(now.getTime()-5000).toISOString(),you:'open the content plan',hugo:'which one?',lookup:{source:'open-candidates',candidates:ambiguous.candidates}}];
+ const exchanges=[{ts:new Date(now.getTime()-5000).toISOString(),you:'open the content plan',jarvis:'which one?',lookup:{source:'open-candidates',candidates:ambiguous.candidates}}];
  assert.equal(resolve(root,'the second one',{exchanges}).path,'projects/2026-04-30-content-backfill-plan.md');
  assert.equal(resolve(root,'the calendar one',{exchanges}).path,'projects/2026-05-02-content-calendar-plan.md');
  assert.equal(resolve(root,'open the content backfill plan').path,'projects/2026-04-30-content-backfill-plan.md');
@@ -93,8 +93,8 @@ test('named notes match by title words, tolerate speech errors, and ask when two
  write('inbox/research/call-transcripts/2026-05-20-dario-proposal.md');write('projects/proposals/2026-06-01-dario-proposal.pdf','%PDF-1.4\n');invalidateTargetIndex(root);
  const twins=resolve(root,'open the dario proposal');assert.equal(twins.kind,'ambiguous');
  assert.deepEqual(twins.candidates.map(c=>c.label).sort(),['dario proposal as a PDF','dario proposal from Monday, June 1','dario proposal from Wednesday, May 20']);
- assert.equal(resolve(root,'the pdf one',{exchanges:[{ts:new Date(now.getTime()-5000).toISOString(),you:'open the dario proposal',hugo:'which one?',lookup:{source:'open-candidates',candidates:twins.candidates}}]}).path,'projects/proposals/2026-06-01-dario-proposal.pdf');
- assert.equal(resolve(root,'the may one',{exchanges:[{ts:new Date(now.getTime()-5000).toISOString(),you:'open the dario proposal',hugo:'which one?',lookup:{source:'open-candidates',candidates:twins.candidates}}]}).path,'inbox/research/call-transcripts/2026-05-20-dario-proposal.md');
+ assert.equal(resolve(root,'the pdf one',{exchanges:[{ts:new Date(now.getTime()-5000).toISOString(),you:'open the dario proposal',jarvis:'which one?',lookup:{source:'open-candidates',candidates:twins.candidates}}]}).path,'projects/proposals/2026-06-01-dario-proposal.pdf');
+ assert.equal(resolve(root,'the may one',{exchanges:[{ts:new Date(now.getTime()-5000).toISOString(),you:'open the dario proposal',jarvis:'which one?',lookup:{source:'open-candidates',candidates:twins.candidates}}]}).path,'inbox/research/call-transcripts/2026-05-20-dario-proposal.md');
  // Bare nouns that are also workflow names are notes, not workflow outputs.
  assert.deepEqual(matchSkill('the plan'),[]);assert.deepEqual(matchSkill('the outline'),[]);assert.deepEqual(matchSkill('plan tomorrow'),[]);
  assert.equal(resolve(root,'open the main plugin file').kind,'unresolved');
@@ -115,9 +115,9 @@ test('referential asks use the selected conversation first, then what was just s
  const html={id:'22222222-2222-4222-8222-222222222222',title:'Jev explainer',turns:[{id:'t1',ts:1,text:'Done.\n\n[View the explainer](<'+root.replace(/\\/g,'/')+'/outputs/jev-explainer/jev-explainer.html>)',artifactErrors:['This artifact type is not supported for preview.']}]};
  const blocked=resolve(root,"Can't you pull up that explainer in one of the obsidian tabs?",{selectedTask:html});
  assert.equal(blocked.kind,'undisplayable');assert.equal(blocked.path,'outputs/jev-explainer/jev-explainer.html');assert.equal(blocked.ext,'html');
- const exchanges=[{ts:new Date(now.getTime()-5000).toISOString(),you:'what was the top news',hugo:'...',deliverable:'inbox/research/morning-intel/2026-09-16-intel.md',workIds:[]}];
+ const exchanges=[{ts:new Date(now.getTime()-5000).toISOString(),you:'what was the top news',jarvis:'...',deliverable:'inbox/research/morning-intel/2026-09-16-intel.md',workIds:[]}];
  const referent=resolve(root,'pull that up',{exchanges});assert.equal(referent.kind,'note');assert.equal(referent.path,'inbox/research/morning-intel/2026-09-16-intel.md');assert.equal(referent.referent,true);
- const viaWork=resolve(root,'show me the image',{exchanges:[{ts:new Date(now.getTime()-5000).toISOString(),you:'make a diagram',hugo:'ok',workIds:[task.id]}],taskById:id=>id===task.id?task:null});
+ const viaWork=resolve(root,'show me the image',{exchanges:[{ts:new Date(now.getTime()-5000).toISOString(),you:'make a diagram',jarvis:'ok',workIds:[task.id]}],taskById:id=>id===task.id?task:null});
  assert.equal(viaWork.kind,'artifact');assert.equal(viaWork.selected,false);assert.equal(viaWork.taskTitle,'Explainer task');
  assert.equal(resolve(root,'pull it up').kind,'unresolved');
  assert.equal(resolve(root,'What is my schedule looking like today?',{selectedTask:task}),null);

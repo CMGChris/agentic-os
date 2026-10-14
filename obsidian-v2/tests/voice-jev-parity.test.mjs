@@ -168,7 +168,7 @@ test('more adversarial follow-ups stay identical with Jev confidently wrong',asy
 });
 test('everyday declines are answered by the exact-phrase rule and never reach a classifier',async t=>{
  const fx=fixture(t);fx.add();
- for(const say of ["No, that's okay.",'No that’s fine','Nah, I\'m good for now.','I\'m good','no thats ok hugo']){
+ for(const say of ["No, that's okay.",'No that’s fine','Nah, I\'m good for now.','I\'m good','no thats ok jarvis']){
   const receipt=await speak(fx,say,{workTarget:fx.tasks[0].id,execute:()=>assert.fail(`a model was called for: ${say}`),jev:jevOptions(fx,()=>assert.fail(`Jev was asked about: ${say}`))});
   assert.equal(receipt.decision.rule,'router.decline',say);assert.equal(receipt.reply,'Standing by.');
  }

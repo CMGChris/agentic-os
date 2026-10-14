@@ -27,8 +27,8 @@ import {inspectLocalLookup} from '../runner/lookup-catalog.mjs';
 const scope=receipt=>receipt.appScope||'web';
 const reachedClassifier=receipt=>receipt.decision?receipt.decision.boundary==='general':receipt.engine!=='rules'&&receipt.lookupRoute!=='scoped-model';
 const looksLikeTest=receipt=>receipt.origin==='test'||/do not use tools|integration (?:check|test)|answer with that word only|reply with only that phrase|based only on the saved context/i.test(receipt.transcript);
-const affirmation=text=>/^(?:yes(?: please)?(?: (?:do (?:it|that)|go ahead))?|yeah|yep|sure|absolutely|go ahead|do (?:it|that)|let'?s do (?:it|that)|please do(?: (?:it|that))?|go for it|sounds good)(?: please)?(?: hugo)?[.!?\s]*$/i.test(text.trim().replace(/,/g,' ').replace(/\s+/g,' '));
-const exchange=other=>({you:other.transcript,hugo:other.reply||'',...(other.pendingSkill?{pendingSkill:other.pendingSkill}:{}),...(other.lookupRoute?{lookupRoute:other.lookupRoute}:{})});
+const affirmation=text=>/^(?:yes(?: please)?(?: (?:do (?:it|that)|go ahead))?|yeah|yep|sure|absolutely|go ahead|do (?:it|that)|let'?s do (?:it|that)|please do(?: (?:it|that))?|go for it|sounds good)(?: please)?(?: jarvis)?[.!?\s]*$/i.test(text.trim().replace(/,/g,' ').replace(/\s+/g,' '));
+const exchange=other=>({you:other.transcript,jarvis:other.reply||'',...(other.pendingSkill?{pendingSkill:other.pendingSkill}:{}),...(other.lookupRoute?{lookupRoute:other.lookupRoute}:{})});
 
 export function buildReplayCases(input){
  const receipts=input.filter(receipt=>receipt&&typeof receipt.transcript==='string').sort((a,b)=>a.ts-b.ts);

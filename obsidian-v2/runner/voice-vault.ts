@@ -1,4 +1,4 @@
-// Vault parsers ported from the original Hugo router; root is request-scoped.
+// Vault parsers ported from the original Jarvis router; root is request-scoped.
 import { TIME_ZONE } from "../shared/timezone.mjs";
 import fs from "fs";
 import path from "path";
@@ -210,7 +210,7 @@ export function readLatestVideo(): LatestVideo | null {
 // which is useless when two are in flight ("fable 5 news" vs "gmail thing").
 // First 3 content words of the prompt.
 const ASK_STOP = new Set([
-  "a", "an", "the", "me", "my", "i", "you", "your", "please", "hugo", "hey",
+  "a", "an", "the", "me", "my", "i", "you", "your", "please", "jarvis", "hey",
   "ok", "okay", "can", "could", "would", "tell", "about", "like", "little",
   "bit", "more", "just", "that", "this", "what", "whats", "is", "are", "do",
   "does", "of", "for", "to", "in", "on", "and", "or", "so", "um", "uh",

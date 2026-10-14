@@ -1,6 +1,6 @@
 // Destination commands only. This does not classify work or bypass the voice
 // router: the meaningful payload still goes through the existing three tiers.
-const courtesy=/^(?:(?:hey(?: hugo)?|hugo|please|okay|ok|so)[,\s]+)*(?:(?:(?:can|could|would) you(?: please)?|are you able to|i(?: would|'d) like you to|i want you to)\s+)?/i;
+const courtesy=/^(?:(?:hey(?: jarvis)?|jarvis|please|okay|ok|so)[,\s]+)*(?:(?:(?:can|could|would) you(?: please)?|are you able to|i(?: would|'d) like you to|i want you to)\s+)?/i;
 const prefix=/^(?:(?:start|open|create|begin)(?: me)?\s+(?:(?:(?:a|one)\s+)?(?:new|separate)\s+(?:task|conversation|terminal)|another\s+(?:task|conversation|terminal)|(?:(?:two|three|four|\d+|multiple|several)\s+)?(?:new|separate)\s+(?:tasks|conversations|terminals))|(?:new|separate)\s+(?:task|conversation|terminal))\b/i;
 const work=/^(?:research|investigate|build|draft|write|create|make|generate|analy[sz]e|compare|run|refresh|review|edit|put together|look into)\b/i;
 const correction=/(?:[,;.!?]\s*|\s+(?:but|and)\s+)(?:actually\s+)?(?:never mind\b|not yet\b|no(?:[,!.\s]|$)|(?:do not|don't)\s+(?:start|open|create|begin)\b|keep (?:this|the current|the existing) (?:task|conversation|terminal)\b)/i;

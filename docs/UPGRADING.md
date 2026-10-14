@@ -3,7 +3,7 @@
 You can start from V1, an older V2 starter, or a version you have customized. Open Claude Code or Codex and say:
 
 ```text
-Use https://github.com/CMGChris/agentic-os to help upgrade my existing Agentic OS. Find my installation and vault, explain what I can add, and preserve my customizations. Show me the plan before changing my setup.
+Use https://github.com/ctskool/agentic-os-starter-v2 to help upgrade my existing Agentic OS. Find my installation and vault, explain what I can add, and preserve my customizations. Show me the plan before changing my setup.
 ```
 
 Your agent first finds your installation and vault. If it finds several, it asks which vault you use. If it cannot find yours, it helps you locate the vault through Obsidian and your computer's folder browser; you do not need to know the path beforehand.
@@ -18,7 +18,7 @@ Review a concrete plan    Files, dependencies, tests and rollback
 Apply and verify          Agree before interrupting your working system
 ```
 
-You can ask for the cockpit, Hugo HUD, local voice, optional Jev, personal dashboard buttons, or bundled workflows. Your agent explains what each needs and suggests a compatible approach. A skill or plugin being present does not prove it works with the rest of your system. Some features require matching bridge, plugin and HUD changes.
+You can ask for the cockpit, Jarvis HUD, local voice, optional Jev, personal dashboard buttons, or bundled workflows. Your agent explains what each needs and suggests a compatible approach. A skill or plugin being present does not prove it works with the rest of your system. Some features require matching bridge, plugin and HUD changes.
 
 Tell the agent which parts of your existing setup matter to you, and which skills you use often. It can inspect selected non-secret files to compare versions, but it cannot infer your usage history from a list of installed skills.
 

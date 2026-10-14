@@ -15,7 +15,7 @@ import { recentExchanges } from "./voice-context.mjs";
 import { localDate } from "./brief-voice.mjs";
 import { openIntent } from "./voice-targets.mjs";
 
-// Ported from Hugo lib/router.ts: shared rules, snapshot prompt and action validation.
+// Ported from Jarvis lib/router.ts: shared rules, snapshot prompt and action validation.
 // Model execution, provider isolation and terminal dispatch live in voice-router.mjs.
 
 export interface RouteResult {
@@ -143,7 +143,7 @@ const QUESTION_START = /^(what|how|is|are|was|did|when|who|where|why|any|do i|do
 // github trending report today" got the whole daily spiel). Specific asks
 // now fall through to the model engines, which answer about the THING asked.
 const BRIEFING_RE =
-  /^(?:hey |ok |okay |so )*(?:hugo,? )?(?:(?:can you |could you |what'?s |whats )?(?:give me |read me |run )?(?:the |my )?(?:daily |morning |full )?(?:rundown|briefing)|brief me|catch me up|good morning|morning,? hugo)(?: for today| on today| today)?(?: please)?(?:,? hugo)?$/;
+  /^(?:hey |ok |okay |so )*(?:jarvis,? )?(?:(?:can you |could you |what'?s |whats )?(?:give me |read me |run )?(?:the |my )?(?:daily |morning |full )?(?:rundown|briefing)|brief me|catch me up|good morning|morning,? jarvis)(?: for today| on today| today)?(?: please)?(?:,? jarvis)?$/;
 
 export function performWrite(w: VaultWrite, state: VaultState): string {
   if (!state.daily?.isToday) {
@@ -171,7 +171,7 @@ export function performWrite(w: VaultWrite, state: VaultState): string {
 const RERUN_RE = /\b(again|another|re-?run|one more|fresh|new one)\b/;
 // dispatch verbs, temporal connectives, and politeness — NOT content words
 const RESIDUE_FILLER =
-  /\b(once|when|after|while|you'?re?|are|is|it'?s?|done|finished|finish(es)?|complete(s|d)?|with|that|the|a|an|and|then|can|could|would|you|please|hugo|hey|ok|okay|so|also|me|my|run|pull|do|start|fire|kick|queue|launch|scan|fetch|refresh|get|brief|report|audit)\b/g;
+  /\b(once|when|after|while|you'?re?|are|is|it'?s?|done|finished|finish(es)?|complete(s|d)?|with|that|the|a|an|and|then|can|could|would|you|please|jarvis|hey|ok|okay|so|also|me|my|run|pull|do|start|fire|kick|queue|launch|scan|fetch|refresh|get|brief|report|audit)\b/g;
 
 function skillInFlight(skill: string, state: VaultState): boolean {
   return (
@@ -219,9 +219,9 @@ export function inFlightGuard(r: RouteResult, transcript: string, state: VaultSt
 // convo memory (fresh within 3 min), so this stays stateless per-request.
 
 const AFFIRM_RE =
-  /^(yes|yeah|yep|sure|absolutely|go ahead|do it|let'?s do it|please do|yes please|go for it|sounds good)( please)?,?( hugo)?$/;
+  /^(yes|yeah|yep|sure|absolutely|go ahead|do it|let'?s do it|please do|yes please|go for it|sounds good)( please)?,?( jarvis)?$/;
 const DECLINE_RE =
-  /^(no|nope|nah|not (right )?now|not yet|later|maybe later|hold off|skip it)( thanks| thank you)?,?( hugo)?$/;
+  /^(no|nope|nah|not (right )?now|not yet|later|maybe later|hold off|skip it)( thanks| thank you)?,?( jarvis)?$/;
 const OFFER_SKILLS: Record<string, string> = {
   "morning report": "morning-report",
   "inbox audit": "inbox-brief",
@@ -232,7 +232,7 @@ const OFFER_SKILLS: Record<string, string> = {
 function pendingOffer(): string | null {
   const last = recentExchanges(1)[0];
   if (!last || Date.now() - Date.parse(last.ts) > 3 * 60 * 1000) return null;
-  const m = last.hugo
+  const m = last.jarvis
     .toLowerCase()
     .match(/want me to (?:run|pull) (?:the )?(?:daily )?(morning report|inbox audit|fresh metrics|a trend scan)/);
   return m ? OFFER_SKILLS[m[1]] ?? null : null;
@@ -379,8 +379,8 @@ export function rulesRoute(transcript: string, state: VaultState): RouteResult {
 
 // Small talk only when the whole utterance is small talk. "Thanks, now
 // research Jev" and "how's it going with the explainer" carry a request.
-const SMALLTALK_LEAD = "(?:(?:hey|hi|hello|yo|ok|okay|so|well|um|uh|oh|cool|nice|great|perfect|sweet|awesome|hugo|astra)\\s+)*";
-const SMALLTALK_TAIL = "(?:\\s+(?:hugo|astra|man|dude|there|today|again|please|so much|a lot|very much|for that|for this|thanks|thank you|cheers))*";
+const SMALLTALK_LEAD = "(?:(?:hey|hi|hello|yo|ok|okay|so|well|um|uh|oh|cool|nice|great|perfect|sweet|awesome|jarvis|astra)\\s+)*";
+const SMALLTALK_TAIL = "(?:\\s+(?:jarvis|astra|man|dude|there|today|again|please|so much|a lot|very much|for that|for this|thanks|thank you|cheers))*";
 const wholeSmalltalk = (core: string) => new RegExp(`^${SMALLTALK_LEAD}(?:${core})${SMALLTALK_TAIL}$`);
 const SMALLTALK_MIC = wholeSmalltalk("can you hear me|are you there|you there|you up|mic check|testing testing|test test|testing");
 const SMALLTALK_THANKS = wholeSmalltalk("thank you|thanks|thanks a lot|thank you so much|appreciate it|appreciate you|cheers|nice one");
@@ -392,8 +392,8 @@ function smalltalk(t: string, state: VaultState): string | null {
   if (SMALLTALK_MIC.test(t)) return "Loud and clear.";
   if (SMALLTALK_THANKS.test(t)) return "Anytime.";
   if (SMALLTALK_BYE.test(t)) return "Goodnight. I'll keep watch.";
-  // bare acks in any short combo: "ok", "okay cool", "nice one hugo"
-  if (/^((ok(ay)?|cool|nice|got it|sounds good|great|perfect|alright|sweet|then|one|man|hugo)\s*){1,4}$/.test(t)) {
+  // bare acks in any short combo: "ok", "okay cool", "nice one jarvis"
+  if (/^((ok(ay)?|cool|nice|got it|sounds good|great|perfect|alright|sweet|then|one|man|jarvis)\s*){1,4}$/.test(t)) {
     return "Standing by.";
   }
   if (SMALLTALK_HOW.test(t)) return "Running smooth — all systems green. What do you need?";
@@ -527,7 +527,7 @@ const REPORT_RES: [RegExp, keyof typeof REPORT_TARGETS][] = [
 // Parse presentation intent independently of the report name. Spoken wrappers
 // and separable verbs ("pull the report up") apply to every registered report;
 // the complete remaining target still has to match, with no unknown clauses.
-const REPORT_PREAMBLE = /^(?:(?:hey|hi|hello|ok|okay|all right|alright|so|well|hugo|astra|please|just|go ahead(?: and)?)\s+|(?:(?:would|do) you mind|(?:can|could|would|will) (?:you|i)|are you able to|i(?: would|'d) like (?:you )?to|i (?:want|need) (?:you )?to)\s+)*/;
+const REPORT_PREAMBLE = /^(?:(?:hey|hi|hello|ok|okay|all right|alright|so|well|jarvis|astra|please|just|go ahead(?: and)?)\s+|(?:(?:would|do) you mind|(?:can|could|would|will) (?:you|i)|are you able to|i(?: would|'d) like (?:you )?to|i (?:want|need) (?:you )?to)\s+)*/;
 const REPORT_OPEN = /^(?:open(?:ing)?(?: up)?|pull(?:ing)? up|bring(?:ing)? up|show(?:ing)?(?: me| us)?|put(?:ting)?(?: up)?|go(?:ing)? to|display(?:ing)?|view(?:ing)?|see)\s+(.+)$/;
 const REPORT_OPEN_SEPARABLE = /^(?:pull(?:ing)?|bring(?:ing)?)\s+(.+)\s+up$/;
 
@@ -541,7 +541,7 @@ export function routeNamedReportOpen(transcript: string): RouteResult | null {
     .replace(/[,.!?]/g, " ").replace(/\s+/g, " ").trim();
   const today = /\b(?:today|todays|today's|this morning's)\b/.test(t);
   const clean = t.replace(REPORT_PREAMBLE, "").trim()
-    .replace(/(?:\s+(?:for me|please|thanks|thank you|hugo|again|in obsidian|(?:from|for) today))+$/, "").trim()
+    .replace(/(?:\s+(?:for me|please|thanks|thank you|jarvis|again|in obsidian|(?:from|for) today))+$/, "").trim()
     .replace(/\bthis morning's\b/g, "today's morning");
   const { rest } = extractWhere(clean);
   const command = REPORT_OPEN.exec(rest) ?? REPORT_OPEN_SEPARABLE.exec(rest);
@@ -570,9 +570,9 @@ const WEB_RES: [RegExp, keyof typeof WEB_TARGETS][] = [
 ];
 
 // spoken commands arrive wrapped in politeness — strip the whole preamble
-// ("hey hugo can you go ahead and pull up…" → "pull up…")
+// ("hey jarvis can you go ahead and pull up…" → "pull up…")
 const POLITE_RE =
-  /^(?:hey |ok |okay |so |um |uh |well )*(?:hugo,? )?(?:can you |could you |would you |will you |please |go ahead and |go ahead |just )*/;
+  /^(?:hey |ok |okay |so |um |uh |well )*(?:jarvis,? )?(?:can you |could you |would you |will you |please |go ahead and |go ahead |just )*/;
 
 function obsidianAnswer(t: string): ObsidianAction | null {
   const clean = t.replace(POLITE_RE, "").trim();
@@ -640,7 +640,7 @@ function repoAnswer(t: string, state: VaultState): ObsidianAction | string | nul
 
   // 2. slug in the recent conversation
   const convoText = recentExchanges(3)
-    .map((e) => `${e.you} ${e.hugo}`)
+    .map((e) => `${e.you} ${e.jarvis}`)
     .join(" ");
   const fromConvo = slugsIn(convoText);
   if (fromConvo.length > 0) {
@@ -676,13 +676,13 @@ const OPEN_VERB_ANY = /\b(bring up|pull up|open|show me|show us|put up|display|g
 const WRITE_VERB =
   "(?:check(?: off)?|mark|complete|finish|tick|knock out|uncheck|untick)";
 const TOP3_WRITE_RE = new RegExp(
-  `^(?:hey |ok |okay )*(?:hugo,? )?${WRITE_VERB}\\s+(?:off\\s+)?(?:my\\s+|the\\s+)?(?:priority|directive|top ?(?:three|3))\\s*(?:number\\s*)?(one|two|three|1|2|3)(?:\\s+(?:as\\s+)?(?:done|complete|finished|off))?$`
+  `^(?:hey |ok |okay )*(?:jarvis,? )?${WRITE_VERB}\\s+(?:off\\s+)?(?:my\\s+|the\\s+)?(?:priority|directive|top ?(?:three|3))\\s*(?:number\\s*)?(one|two|three|1|2|3)(?:\\s+(?:as\\s+)?(?:done|complete|finished|off))?$`
 );
 const TASK_WRITE_RE = new RegExp(
-  `^(?:hey |ok |okay )*(?:hugo,? )?${WRITE_VERB}\\s+(?:off\\s+)?(?:my\\s+|the\\s+)?(.+)$`
+  `^(?:hey |ok |okay )*(?:jarvis,? )?${WRITE_VERB}\\s+(?:off\\s+)?(?:my\\s+|the\\s+)?(.+)$`
 );
 const ADD_TASK_RE =
-  /^(?:hey |ok |okay )*(?:hugo,? )?add\s+(?:a\s+)?(?:task\s+|driver\s+)?(.+?)(?:\s+to\s+(?:my\s+|the\s+)?(?:tasks?|drivers?|daily drivers?|list|board|today))?$/;
+  /^(?:hey |ok |okay )*(?:jarvis,? )?add\s+(?:a\s+)?(?:task\s+|driver\s+)?(.+?)(?:\s+to\s+(?:my\s+|the\s+)?(?:tasks?|drivers?|daily drivers?|list|board|today))?$/;
 const IDX: Record<string, number> = { one: 0, "1": 0, two: 1, "2": 1, three: 2, "3": 2 };
 const SPOKEN_IDX = ["one", "two", "three"];
 // "add X to my tasks and draft an outline" is two requests; the second one is
@@ -768,9 +768,9 @@ function vaultWriteAnswer(
 // "read me the morning report" — resolve the doc like openDocAnswer, then
 // speak its CONTENT (sanitized, capped) instead of just popping it on screen.
 
-const READ_RE = /^(?:hey |ok |okay )*(?:hugo,? )?read(?: me| out loud| out| aloud)?\b/;
+const READ_RE = /^(?:hey |ok |okay )*(?:jarvis,? )?read(?: me| out loud| out| aloud)?\b/;
 const READ_STOP =
-  /\b(read|me|out|loud|aloud|the|that|it|my|please|hugo|from|todays|today|latest|last|report|reports)\b/g;
+  /\b(read|me|out|loud|aloud|the|that|it|my|please|jarvis|from|todays|today|latest|last|report|reports)\b/g;
 
 function readAloudAnswer(t: string, state: VaultState): StateAnswer | null {
   if (!READ_RE.test(t)) return null;
@@ -1036,7 +1036,7 @@ interface StateAnswer {
 const OPEN_VERB = /\b(bring up|pull up|open|show me|show us|put up|display)\b/;
 const DOC_WORD = /\b(that|it|html|page|explainer|doc|document|report|file|deliverable|note|results?)\b/;
 const OPEN_STOPWORDS =
-  /\b(bring|pull|up|open|show|me|us|put|display|the|that|it|for|can|you|please|hugo|again|back|one|thing|doc|document|file|note|report|reports|today|todays|right|left|sidebar|side|panel|split|over|in|on|a)\b/g;
+  /\b(bring|pull|up|open|show|me|us|put|display|the|that|it|for|can|you|please|jarvis|again|back|one|thing|doc|document|file|note|report|reports|today|todays|right|left|sidebar|side|panel|split|over|in|on|a)\b/g;
 
 // Filler that must never count as evidence for a document match.
 const OPEN_FILLER = new Set([
@@ -1425,7 +1425,7 @@ const WHERE_ALLOW = ["tab", "split", "right-sidebar", "left-sidebar"];
 // model-emitted UI actions pass through the SAME allowlists as the rules —
 // op whitelist, command ids from COMMAND_ALLOW, web targets by NAME only.
 // A model can suggest an action; it can never mint one.
-// placement doctrine (Curiosity, 2026-08-14): default = a TAB in the main pane.
+// placement doctrine (Chase, 2026-08-14): default = a TAB in the main pane.
 // The model may only place things elsewhere when the user's own words asked
 // for a placement — Haiku volunteering where:"split" put Gmail at the bottom
 // of the screen unasked. Habitual homes for specific targets live in

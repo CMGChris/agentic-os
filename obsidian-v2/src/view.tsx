@@ -1,15 +1,15 @@
 import { ItemView, WorkspaceLeaf } from "obsidian";
 import { render, h } from "preact";
 import { Cockpit } from "./components/Cockpit";
-import type CuriosityCommandCenter from "./main";
+import type ChaseCommandCenter from "./main";
 
 export const COCKPIT_VIEW_TYPE = "agentic-os-v2";
 
 export class CockpitView extends ItemView {
-	plugin: CuriosityCommandCenter;
+	plugin: ChaseCommandCenter;
 	private mountEl: HTMLElement | null = null;
 
-	constructor(leaf: WorkspaceLeaf, plugin: CuriosityCommandCenter) {
+	constructor(leaf: WorkspaceLeaf, plugin: ChaseCommandCenter) {
 		super(leaf);
 		this.plugin = plugin;
 	}

@@ -66,10 +66,10 @@ Use this capability list as a guide to discussion, not as an automatic compatibi
 | Capability | What the member gets | Dependencies to check |
 |---|---|---|
 | Obsidian cockpit | Daily plan, metrics and workflow controls in the vault | Compatible plugin and bridge; existing note/parser conventions; Obsidian. Personal-skill conversations inside Obsidian also require the Terminal community plugin, a stable 3.x release from 3.27.1 on. |
-| Hugo HUD | Browser dashboard and agent terminals | Compatible HUD, bridge and launcher/monitor configuration; selected Claude Code or Codex CLI. |
+| Jarvis HUD | Browser dashboard and agent terminals | Compatible HUD, bridge and launcher/monitor configuration; selected Claude Code or Codex CLI. |
 | Local voice | Speech recognition and spoken replies on the computer | Compatible bridge and voice client, Python/model requirements, microphone permission, and either owned speech or an already compatible shared service. |
 | Optional Jev | Routing for spoken requests through OpenRouter | Compatible voice routing; member's OpenRouter account and credit; key entered locally. Voice can work without Jev. |
-| Personal dashboard buttons | Choose and order up to ten bundled or installed skills | Matching dashboard APIs, configuration schema and UI versions; each personal skill's actual provider and dependencies. Obsidian personal skills require Terminal; Hugo can run them without that plugin. |
+| Personal dashboard buttons | Choose and order up to ten bundled or installed skills | Matching dashboard APIs, configuration schema and UI versions; each personal skill's actual provider and dependencies. Obsidian personal skills require Terminal; Jarvis can run them without that plugin. |
 | Bundled workflows | Reports and drafts such as planning, research and content | Compatible runner/bridge and vault conventions, a signed-in coding provider, plus any connectors required by the specific workflow. |
 
 For example: "You want your own skill buttons and you like your current dashboard design. I recommend keeping the design and integrating the dashboard API, saved selection and matching button controls together. I will check the bridge contracts first; copying just the buttons would not establish compatibility."

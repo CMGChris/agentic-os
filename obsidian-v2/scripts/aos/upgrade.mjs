@@ -9,7 +9,7 @@ import {assessCheckout} from './upgrade-checkout.mjs';
 
 export const UPGRADE_FEATURES = Object.freeze([
   {id: 'cockpit', name: 'Obsidian cockpit', description: 'Planning, conversations and workflows inside your vault.', dependencies: ['Compatible local bridge and plugin; Terminal plugin for interactive conversations.']},
-  {id: 'hud', name: 'Hugo HUD', description: 'A browser dashboard for conversations, workflows and voice.', dependencies: ['Matching bridge and HUD versions; shared dashboard data.']},
+  {id: 'hud', name: 'Jarvis HUD', description: 'A browser dashboard for conversations, workflows and voice.', dependencies: ['Matching bridge and HUD versions; shared dashboard data.']},
   {id: 'voice', name: 'Local voice', description: 'Speak requests and hear replies on your computer.', dependencies: ['Compatible bridge and speech service; microphone permission; Python for an owned speech service.']},
   {id: 'jev', name: 'Optional Jev router', description: 'Route voice requests using an optional OpenRouter model.', dependencies: ['Working voice and compatible bridge; the member enters their own OpenRouter key locally.']},
   {id: 'dashboard', name: 'Your own skill buttons', description: 'Choose and order up to ten buttons shared by both dashboards.', dependencies: ['Compatible bridge and dashboard interfaces; each personal skill needs its own tools and accounts.']},

@@ -113,10 +113,10 @@ export class NativeTerminalTabs {
    if(snapshot.attachmentProtocol!==1)return this.fallback('The V2 bridge needs its terminal attachment update. Restart the updated bridge when its work is safe to interrupt.');
    const task=snapshot.tasks.find(task=>task.id===id);
    if(!task)return this.fallback('That saved conversation is no longer available.');
-   if(task.execution==='native')return this.fallback('Open this conversation from Hugo to restore its native terminal.');
+   if(task.execution==='native')return this.fallback('Open this conversation from Jarvis to restore its native terminal.');
    if(task.execution==='headless')return this.fallback('This workflow runs in the background. Its report appears on the dashboard.');
    if(task.execution==='script')return this.fallback('This refresh runs as a script. Its results appear on the dashboard.');
-   if(!task.pid&&['stopped','error'].includes(task.state))return this.fallback('That conversation is stopped. Resume it from Hugo history, or open a new terminal.');
+   if(!task.pid&&['stopped','error'].includes(task.state))return this.fallback('That conversation is stopped. Resume it from Jarvis history, or open a new terminal.');
    const existing=this.app.workspace.getLeavesOfType(NATIVE_TERMINAL_VIEW).find(leaf=>{
     const target=terminalConversation(leaf),state=profileState(leaf),profile=state?.profile;
     return target?.id===id&&target.provider===task.provider&&canonical(String(profile.executable))===canonical(config.nodeExecutable)&&canonical(String(profile.args?.[0]))===canonical(config.attachmentScript)&&canonical(String(profile.args?.[2]))===canonical(config.runtimeDir);

@@ -9,7 +9,7 @@ since: 2026-05-11
 
 Frozen contract. Source of truth for:
 - `system/templates/daily.md` (Templater template)
-- the Agentic OS V2 plugin and Hugo HUD parsers
+- the Agentic OS V2 plugin and Jarvis HUD parsers
 - `/today` skill (writer)
 - `/close-day` skill (writer)
 - `activity-log.js` hook (appender)

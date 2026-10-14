@@ -49,10 +49,10 @@ function installPackages(dir, label, log, stamps) {
 }
 
 function buildHud(at, log) {
-  const current = path.join(at.hugo, '.next'), previous = path.join(at.runtime, 'next-previous');
+  const current = path.join(at.jarvis, '.next'), previous = path.join(at.runtime, 'next-previous');
   fs.rmSync(previous, {recursive: true, force: true});
   if (fs.existsSync(current)) fs.renameSync(current, previous);
-  try { npm('Hugo HUD: building (about a minute)', ['run', 'build'], at.hugo, log); }
+  try { npm('Jarvis HUD: building (about a minute)', ['run', 'build'], at.jarvis, log); }
   catch (error) {
     // A half-written build cannot serve; the previous one can.
     fs.rmSync(current, {recursive: true, force: true});
@@ -92,7 +92,7 @@ export async function preflight(at, vault, {adopt = false, get = tryJson, find =
   if (!monitor && find(PORTS.supervisor)) throw new Error('Another program is using port 3221. Nothing was changed.');
   // Whatever listens on our ports must prove it is this installation; our own monitor running is no excuse.
   if (find(PORTS.bridge) && !await bridgeIsOurs(at, post ? {post} : {})) throw new Error('Another program (or another installation of this system) is using port 3219. Stop it first. Nothing was changed.');
-  if (find(PORTS.hugo) && !await hudIsOurs(at, {get, find})) throw new Error('Another program (or another installation of this system) is using port 3217. Stop it first. Nothing was changed.');
+  if (find(PORTS.jarvis) && !await hudIsOurs(at, {get, find})) throw new Error('Another program (or another installation of this system) is using port 3217. Stop it first. Nothing was changed.');
   const marker = path.join(vault, '.obsidian', 'plugins', 'agentic-os-v2', 'terminal-runtime.json');
   let owner = null; try { owner = JSON.parse(fs.readFileSync(marker, 'utf8')).runtimeDir; } catch { /* not connected yet */ }
   if (owner && !samePath(owner, at.runtime) && !adopt) throw new Error(`This vault is already connected to another installation (${path.dirname(owner)}). Use that one, or run setup again with --adopt to move the vault to this installation. Nothing was changed.`);
@@ -144,14 +144,14 @@ export async function prepareVoice(at, {wantVoice, explicit = false, log = conso
 // The services setup waits for: the ones the running monitor watches. Without a monitor answer,
 // the two every installation has.
 export const watchedServices = monitor => {
-  const ids = (monitor?.services || []).map(service => service.id).filter(id => ['bridge', 'hugo', 'speech'].includes(id));
-  return ids.length ? ids : ['bridge', 'hugo'];
+  const ids = (monitor?.services || []).map(service => service.id).filter(id => ['bridge', 'jarvis', 'speech'].includes(id));
+  return ids.length ? ids : ['bridge', 'jarvis'];
 };
 
 export async function setup({root = projectRoot, vault, voice, autostart, provider, rebuild = false, ci = false, adopt = false, log = console.log} = {}) {
   const at = layout(root), state = readState(at);
   if (Number(process.versions.node.split('.')[0]) < 22) throw new Error(`Node.js 22 or newer is required (this is ${process.versions.node}). Install the LTS from nodejs.org, open a new terminal and run setup again.`);
-  if (!fs.existsSync(path.join(at.hugo, 'package.json'))) throw new Error(`The Hugo HUD folder is missing next to this one (${at.hugo}). Clone the whole starter repository, not one folder.`);
+  if (!fs.existsSync(path.join(at.jarvis, 'package.json'))) throw new Error(`The Jarvis HUD folder is missing next to this one (${at.jarvis}). Clone the whole starter repository, not one folder.`);
   vault = vault ? path.resolve(vault) : state.vault;
   if (!vault) throw new Error('Tell setup where the vault lives: node aos.mjs setup --vault "<absolute path>"');
   await preflight(at, vault, {adopt});
@@ -159,7 +159,7 @@ export async function setup({root = projectRoot, vault, voice, autostart, provid
   const wantVoice = voice === undefined ? state.voice === true : voice;
 
   const bridgeChanged = installPackages(at.root, 'Bridge and plugin', log, state.stamps);
-  const hudChanged = installPackages(at.hugo, 'Hugo HUD', log, state.stamps);
+  const hudChanged = installPackages(at.jarvis, 'Jarvis HUD', log, state.stamps);
   if (fixPtyHelper(at.root).length) log('-> Terminal helper: made executable');
   writeState(at, state);
   npm('Obsidian plugin: building', ['run', 'build'], at.root, log);
@@ -174,7 +174,7 @@ export async function setup({root = projectRoot, vault, voice, autostart, provid
   Object.assign(state, {vault, voice: wantVoice});
   writeState(at, state);
 
-  if (rebuild || hudChanged || bridgeChanged || !fs.existsSync(at.buildId)) buildHud(at, log); else log('-> Hugo HUD: already built');
+  if (rebuild || hudChanged || bridgeChanged || !fs.existsSync(at.buildId)) buildHud(at, log); else log('-> Jarvis HUD: already built');
   await prepareVoice(at, {wantVoice, explicit: voice === true, log});
 
   await start({root, log});
